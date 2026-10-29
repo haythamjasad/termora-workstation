@@ -22,7 +22,13 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate {
         do {
             let smoke = CommandLine.arguments.contains("--smoke-test")
             let directory: URL
-            if smoke, let temporary = ProcessInfo.processInfo.environment["TERMORA_NATIVE_SMOKE_DATA"] {
+            if smoke {
+                let arguments = CommandLine.arguments
+                let dataIndex = arguments.firstIndex(of: "--smoke-test-data")
+                let argumentPath = dataIndex.flatMap { $0 + 1 < arguments.count ? arguments[$0 + 1] : nil }
+                guard let temporary = argumentPath ?? ProcessInfo.processInfo.environment["TERMORA_NATIVE_SMOKE_DATA"], !temporary.isEmpty else {
+                    throw NativeError("Smoke tests require an isolated data directory.")
+                }
                 directory = URL(fileURLWithPath: temporary, isDirectory: true)
             } else {
                 let base = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -37,6 +43,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate {
             if smoke {
                 controller?.runSmokeTest { [weak self] success in
                     self?.controller?.stopAll()
+                    try? Data((success ? "PASS\n" : "FAIL\n").utf8).write(to: directory.appendingPathComponent("smoke-result.txt"), options: .atomic)
                     print(success ? "PASS Native AppKit window, menu and real PTY round-trip" : "FAIL Native AppKit/PTY smoke test")
                     Darwin.exit(success ? 0 : 1)
                 }
