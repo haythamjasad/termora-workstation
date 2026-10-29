@@ -1,0 +1,46 @@
+name: Termora native Intel Mac
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, codex/termora-native-macos]
+    paths:
+      - 'native-macos/**'
+      - '.github/workflows/termora-native-macos.yml'
+  pull_request:
+    paths:
+      - 'native-macos/**'
+      - '.github/workflows/termora-native-macos.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: macos-15-intel
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build, test, and package the native application
+        working-directory: native-macos
+        env:
+          TERMORA_NATIVE_NO_REVEAL: '1'
+        run: bash 'Build Native Mac.command'
+      - name: Test the application from the completed disk image
+        working-directory: native-macos
+        run: bash Tools/VerifyDiskImage.sh
+      - name: Save the verified Intel DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: Termora-Native-macOS-Intel
+          path: native-macos/Builds/Termora-Native-0.1.0-macOS-Intel.dmg
+          if-no-files-found: error
+          retention-days: 14
+      - name: Save build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Termora-Native-build-diagnostics
+          path: native-macos/Builds/*.log
+          if-no-files-found: ignore
+          retention-days: 14
