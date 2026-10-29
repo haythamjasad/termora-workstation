@@ -80,7 +80,7 @@ xcrun swift "$ROOT/Tools/MakeIcon.swift" "$WORK/Termora.iconset"
 iconutil -c icns "$WORK/Termora.iconset" -o "$APP/Contents/Resources/Termora.icns"
 cp "$ROOT/LICENSE" "$APP/Contents/Resources/LICENSE.txt"
 cp "$ROOT/THIRD-PARTY-NOTICES.md" "$APP/Contents/Resources/THIRD-PARTY-NOTICES.md"
-lipo -verify_arch x86_64 "$APP/Contents/MacOS/TermoraNative"
+lipo "$APP/Contents/MacOS/TermoraNative" -verify_arch x86_64
 codesign --force --sign "${TERMORA_SIGNING_IDENTITY:--}" --timestamp=none "$APP"
 codesign --verify --deep --strict --verbose=2 "$APP"
 mkdir -p "$WORK/test-data"

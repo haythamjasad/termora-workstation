@@ -18,7 +18,7 @@ hdiutil verify "$DMG"
 hdiutil attach -readonly -nobrowse -mountpoint "$MOUNT" "$DMG"
 APP="$MOUNT/Termora Native.app"
 codesign --verify --deep --strict --verbose=2 "$APP"
-lipo -verify_arch x86_64 "$APP/Contents/MacOS/TermoraNative"
+lipo "$APP/Contents/MacOS/TermoraNative" -verify_arch x86_64
 echo "Testing the packaged native window and local terminal..."
 TERMORA_NATIVE_SMOKE_DATA="$WORK/test-data" "$APP/Contents/MacOS/TermoraNative" --smoke-test
 echo "The application inside the DMG passed its native window and PTY smoke test."
