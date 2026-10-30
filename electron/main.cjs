@@ -126,7 +126,7 @@ function registerIPC() {
     const state = store.read();
     let serial = false; try { serial = Boolean(require('serialport').SerialPort); } catch {}
     return { version: app.getVersion(), appName: 'Termora', platform: process.platform, sessions: state.sessions, settings: state.settings, macros: state.macros, cronJobs: state.cronJobs || [], tunnels: terminals.listTunnels(), servers: servers.list(), homePath: os.homedir(), dataPath: app.getPath('userData'),
-      vault: { available: vault.available(), saved: Object.keys(state.vault || {}) }, logDirectory: terminals.logging.directory,
+      vault: { available: vault.canSave(), saved: Object.keys(state.vault || {}) }, logDirectory: terminals.logging.directory,
       capabilities: { local: true, powershell: Boolean(tools.powershell), cmd: Boolean(tools.cmd), wsl: Boolean(tools.wsl), ssh: true, sftp: true, ftp: true, ftps: true, telnet: true, rsh: true, rlogin: true, mosh: true, serial, rdp: Boolean(tools.rdp), vnc: true, vncExternal: Boolean(tools.vnc), x11: Boolean(tools.x11), xdmcp: Boolean(tools.x11),
         details: { wsl: 'Requires an installed WSL distribution.', rdp: process.platform === 'darwin' ? 'Uses the RDP engine bundled in Termora.' : 'Opens the Windows Remote Desktop client.', vnc: 'Embedded noVNC viewer (None or VNC-password security); an installed TigerVNC/RealVNC viewer can be used instead.', x11: 'Starts an installed VcXsrv server; SSH sessions with X11-Forwarding relay remote X clients to it.', telnet: 'Unencrypted TCP terminal with basic Telnet option negotiation.', rsh: 'Unencrypted r-services session (rlogin, or rsh when a command is set).', mosh: 'Built-in Mosh client: starts mosh-server over SSH, then uses encrypted UDP (no local echo prediction).', ftp: 'FTP is unencrypted. Prefer SFTP or FTPS.', serial: 'Physical serial hardware is required.' } } };
   });
@@ -223,7 +223,14 @@ function createWindow() {
 app.whenReady().then(() => { if (!primaryInstance) return; store = new StateStore(app.getPath('userData')); tools = installedTools(); terminals = new TerminalManager({ emit, store, verifyHost }); vault = new CredentialVault(store, safeStorage); applyLogging(store.read().settings); files = new FileManager(terminals);
   servers = new ServerManager({ dataDir: app.getPath('userData'), cronJobs: () => store.read().cronJobs || [], onCronResult: result => { if (window && !window.isDestroyed()) window.webContents.send('cron:result', result); } });
   // macOS routes Cmd+C/V/A/Q through the application menu, so keep a minimal one there.
-  const command = (label, action, accelerator) => ({label, accelerator, click:()=>{if(window && !window.isDestroyed()) window.webContents.send('app:menu',action);}});
+  const command = (label, action, accelerator) => ({ label, accelerator, click: () => {
+    const target = BrowserWindow.getFocusedWindow() || window;
+    // Browser sessions have no application bridge; menu actions belong only to
+    // the workspace or a detached terminal, whichever currently has focus.
+    if (!target || target.isDestroyed()) return;
+    if (target !== window && !detached.has(target.webContents.id)) return;
+    target.webContents.send('app:menu', action);
+  } });
   Menu.setApplicationMenu(process.platform === 'darwin' ? Menu.buildFromTemplate([
     {label:'Termora',submenu:[{role:'about'}, {type:'separator'}, command('Settings…','open-settings','Command+,'), {type:'separator'}, {role:'services'}, {type:'separator'}, {role:'hide'}, {role:'hideOthers'}, {role:'unhide'}, {type:'separator'}, {role:'quit'}]},
     {label:'File',submenu:[command('New Local Terminal','card-powershell','Command+T'),command('New Connection…','new-session','Command+N'),{type:'separator'},command('Import Connections…','toolbar-import','Command+Shift+I'),command('Export Connections…','toolbar-export','Command+Shift+E'),{type:'separator'},command('Close Tab','close-active-tab','Command+W')]},

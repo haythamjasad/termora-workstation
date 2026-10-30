@@ -4,6 +4,7 @@ import zlib from 'node:zlib';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 const require=createRequire(import.meta.url),yauzl=require('yauzl');
+fs.mkdirSync('evidence', { recursive: true });
 const archive=path.resolve('release/Termora-darwin-x64.zip');
 const zip=await new Promise((resolve,reject)=>yauzl.open(archive,{lazyEntries:true},(error,value)=>error?reject(error):resolve(value)));
 const names=new Set(),links=[],binaries={};let entries=0,bytes=0,minimumOS;
@@ -55,6 +56,6 @@ for(const link of links){const target=resolveLink(link.target);if(!names.has(tar
 if(!names.has('Termora.app/Contents/Resources/app/electron/main.cjs')||!names.has('Make Termora DMG.command'))throw new Error('App code or Mac preparation helper missing');
 if(Object.keys(binaries).length<4||!minimumOS)throw new Error('Incomplete native architecture or minimum-OS verification');
 const hash=crypto.createHash('sha256');for await(const chunk of fs.createReadStream(archive))hash.update(chunk);
-const result={checkedAt:new Date().toISOString(),archive,sha256:hash.digest('hex'),minimumOS,entries,uncompressedBytes:bytes,symlinks:links.length,binaries,runtimeTested:false,notes:'Archive CRC, native Intel architecture, executable permissions and framework links verified on Windows; macOS launch/signing not tested.'};
+const result={checkedAt:new Date().toISOString(),archive,sha256:hash.digest('hex'),minimumOS,entries,uncompressedBytes:bytes,symlinks:links.length,binaries,runtimeTested:false,notes:`Archive CRC, native Intel architecture, executable permissions and framework links verified on ${process.platform}; this archive check does not test runtime launch or signing.`};
 fs.writeFileSync('evidence/mac-package-verification.json',JSON.stringify(result,null,2)+'\n');
 console.log(JSON.stringify(result,null,2));

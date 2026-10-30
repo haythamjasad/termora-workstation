@@ -1,6 +1,6 @@
 /* Mac presentation shares the same feature controls and connection handlers. */
-body.mac-style { font: 13px -apple-system, BlinkMacSystemFont, sans-serif; --bg:#1e1e20; --panel:#28282b; --panel-raised:#38383c; --panel-hover:#414145; --line:#48484c; --line-soft:#363639; --text:#ededf0; --muted:#b0b0b7; --faint:#85858d; --accent:#0a84ff; --accent-soft:#164575; --shadow:0 18px 60px #0007; }
-body.mac-style.theme-light { --bg:#fff; --panel:#f0f0f3; --panel-raised:#fff; --panel-hover:#e2e2e7; --line:#d1d1d6; --line-soft:#e4e4e8; --text:#222225; --muted:#64646c; --faint:#8c8c94; --accent:#007aff; --accent-soft:#d8e9ff; }
+html.mac-style body, body.mac-style { font: 13px -apple-system, BlinkMacSystemFont, sans-serif; --bg:#1e1e20; --panel:#28282b; --panel-raised:#38383c; --panel-hover:#414145; --line:#48484c; --line-soft:#363639; --text:#ededf0; --muted:#b0b0b7; --faint:#85858d; --accent:#0a84ff; --accent-soft:#164575; --shadow:0 18px 60px #0007; }
+html.mac-style body.theme-light, body.mac-style.theme-light { --bg:#fff; --panel:#f0f0f3; --panel-raised:#fff; --panel-hover:#e2e2e7; --line:#d1d1d6; --line-soft:#e4e4e8; --text:#222225; --muted:#64646c; --faint:#8c8c94; --accent:#007aff; --accent-soft:#d8e9ff; }
 .mac-style .titlebar { height:52px; min-height:52px; padding:0 100px; justify-content:center; background:var(--panel); color:var(--text); border-bottom:1px solid var(--line-soft); }
 .mac-style .brand { font:600 13px -apple-system, BlinkMacSystemFont, sans-serif; }
 .mac-style .brand .app-icon { display:none; }

@@ -130,7 +130,9 @@ for (const directory of listed.stdout.trim().split(/\r?\n/).slice(1)) {
   const relative = path.relative(root, directory);
   if (!relative.startsWith('node_modules' + path.sep) || relative.includes('..')) throw new Error('Dependency outside project root.');
   // Nested packages are copied with their parent package's tree.
-  if (/node-pty-win32-/.test(relative) || packages.some(parent => relative.startsWith(parent + path.sep))) continue;
+  // Native PTY packages are added once below from the Intel Mac tarball,
+  // preserving spawn-helper's executable mode on every build host.
+  if (/node-pty-(?:win32|darwin|linux)-/.test(relative) || packages.some(parent => relative.startsWith(parent + path.sep))) continue;
   const parts = relative.split(path.sep);
   for (let i = 1; i < parts.length; i++) { const dir = parts.slice(0, i).join('/'); if (!folders.has(dir)) { folders.add(dir); await addDirectory(appPrefix + dir); } }
   packages.push(relative); await addDirectory(appPrefix + parts.join('/')); await addTree(directory, `${appPrefix}${parts.join('/')}/`);

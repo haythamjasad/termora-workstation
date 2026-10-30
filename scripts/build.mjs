@@ -20,5 +20,6 @@ await build({
   platform: 'browser', target: 'chrome140', format: 'iife',
   sourcemap: false, minify: false, legalComments: 'eof', plugins: [novncTopLevelAwait],
 });
+await copyFile('src/platform.js', 'dist/platform.js');
 await copyFile('src/index.html', 'dist/index.html');
 console.log('Built Termora renderer.');

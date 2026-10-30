@@ -1,0 +1,20 @@
+# Generated dependencies, bundles and verification evidence
+node_modules/
+dist/
+release/
+evidence/
+native-macos/Builds/
+nul
+.DS_Store
+
+# Local credentials, imported configurations and personal workspaces
+.env
+.env.*
+*.mobaconf
+*.mxtsessions
+*.pem
+*.key
+state.json
+data/
+__pycache__/
+*.pyc

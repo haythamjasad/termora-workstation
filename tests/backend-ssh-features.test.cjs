@@ -220,3 +220,35 @@ test('saved sessions keep gateway, X11, compression, transfer and r-services fie
   assert.equal(saved.agentForward, true); assert.equal(saved.x11Display, 2); assert.equal(saved.browserProtocol, 'scp'); assert.equal(saved.ftpsMode, 'implicit');
   assert.equal(saved.savePassword, true); assert.equal('password' in saved, false);
 });
+
+test('Mac vault capability does not touch Keychain and saving still requires encryption', () => {
+  let probes = 0;
+  const state = { vault: {} };
+  const store = { read: () => state, update: () => assert.fail('Unavailable encryption must never persist a credential') };
+  const cipher = { isEncryptionAvailable: () => { probes++; return false; }, encryptString: () => assert.fail('Must not encrypt without access'), decryptString: () => assert.fail('Must not decrypt at startup') };
+  const vault = new CredentialVault(store, cipher);
+  assert.equal(vault.canSave('darwin'), true);
+  assert.equal(probes, 0, 'Mac startup must not request Keychain access');
+  assert.equal(vault.canSave('win32'), false);
+  assert.equal(probes, 1, 'Windows keeps its existing availability check');
+  assert.throws(() => vault.save('s1', { password: 'fixture-only' }), /encryption is not available/);
+  assert.equal(probes, 2);
+  assert.deepEqual(state.vault, {});
+});
+
+test('vault requests encryption access only for a missing secret at the saved destination', () => {
+  let probes = 0, decryptions = 0;
+  const state = { sessions: [{ id: 's1', host: 'server.example' }], vault: { s1: { password: Buffer.from('encrypted-fixture').toString('base64') } } };
+  const vault = new CredentialVault({ read: () => state }, {
+    isEncryptionAvailable: () => { probes++; return true; },
+    decryptString: () => { decryptions++; return 'fixture-only'; },
+  });
+  assert.equal(vault.apply({ id: 's1', host: 'attacker.example' }).password, undefined);
+  assert.equal(vault.apply({ id: 's1', host: 'server.example', gatewayHost: 'other.example' }).password, undefined);
+  assert.equal(vault.apply({ id: 's1', host: 'server.example', password: 'typed-fixture' }).password, 'typed-fixture');
+  assert.equal(probes, 0);
+  assert.equal(decryptions, 0);
+  assert.equal(vault.apply({ id: 's1', host: 'server.example' }).password, 'fixture-only');
+  assert.equal(probes, 1);
+  assert.equal(decryptions, 1);
+});

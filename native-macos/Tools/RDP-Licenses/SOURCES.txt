@@ -1,0 +1,6 @@
+SDL3-LICENSE.txt: https://raw.githubusercontent.com/libsdl-org/SDL/release-3.4.18/LICENSE.txt
+SDL3_ttf-LICENSE.txt: https://raw.githubusercontent.com/libsdl-org/SDL_ttf/release-3.2.2/LICENSE.txt
+OpenSSL-LICENSE.txt: https://raw.githubusercontent.com/openssl/openssl/openssl-3.6.5/LICENSE.txt
+Brotli-LICENSE.txt: https://raw.githubusercontent.com/google/brotli/v1.2.1/LICENSE
+zlib-README.txt: https://raw.githubusercontent.com/madler/zlib/v1.3.2/README
+bzip2-LICENSE.txt: https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz
