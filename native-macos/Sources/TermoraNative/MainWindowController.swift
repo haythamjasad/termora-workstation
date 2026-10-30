@@ -173,11 +173,27 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSOutlin
         var content = "full address:s:\(host):\(session.port)\r\nprompt for credentials:i:1\r\n"
         if !session.username.isEmpty { content += "username:s:\(session.username)\r\n" }
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("Termora-\(UUID().uuidString).rdp")
-        guard NSWorkspace.shared.urlForApplication(toOpen: url) != nil else { throw NativeError("Install Microsoft Windows App to open RDP connections.") }
         guard let bytes = content.data(using: .utf16LittleEndian) else { throw NativeError("Could not encode the RDP connection.") }
         try (Data([0xff, 0xfe]) + bytes).write(to: url, options: .atomic)
         try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: url.path)
-        if !NSWorkspace.shared.open(url) { throw NativeError("The RDP application could not open the connection.") }
+        // Create the document before asking Launch Services to resolve its handler.
+        // Prefer Windows App explicitly when the .rdp association is missing or stale.
+        let applicationFolders = [URL(fileURLWithPath: "/Applications", isDirectory: true), FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications", isDirectory: true)]
+        let candidates = applicationFolders.flatMap { folder in
+            ["Windows App.app", "Microsoft Remote Desktop.app"].map { folder.appendingPathComponent($0, isDirectory: true) }
+        }
+        let application = candidates.first { FileManager.default.fileExists(atPath: $0.appendingPathComponent("Contents/Info.plist").path) }
+            ?? NSWorkspace.shared.urlForApplication(toOpen: url)
+        guard let application else {
+            try? FileManager.default.removeItem(at: url)
+            throw NativeError("Windows App could not be found. Put Windows App in Applications, open it once, then retry. Termora also supports an application associated with .rdp files.")
+        }
+        let configuration = NSWorkspace.OpenConfiguration()
+        NSWorkspace.shared.open([url], withApplicationAt: application, configuration: configuration) { [weak self] _, error in
+            if let error {
+                DispatchQueue.main.async { self?.present(NativeError("Could not open the RDP connection in \(application.deletingPathExtension().lastPathComponent): \(error.localizedDescription)")) }
+            }
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 120) { try? FileManager.default.removeItem(at: url) }
     }
     @objc func closeTab() {
