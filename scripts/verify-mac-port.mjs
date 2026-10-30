@@ -26,7 +26,8 @@ try {
   await page.screenshot({path:'release/Termora-macOS-home.png'});
   await application.evaluate(({Menu})=>Menu.getApplicationMenu().items.find(item=>item.label==='File').submenu.items.find(item=>item.label==='New Connection…').click());
   await page.locator('dialog[open]').waitFor();
+  await page.locator('[data-protocol="ssh"]').click();
   await page.screenshot({path:'release/Termora-macOS-session.png'});
-  await page.locator('#dialog-cancel').click();
+  await page.locator('#session-cancel').click();
   console.log('PASS packaged Windows-codebase Mac UI, bridge, bundled RDP detection, real local PTY');
 } finally {await application.close();}

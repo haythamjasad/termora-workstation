@@ -61,7 +61,7 @@ body.mac-style.theme-light { --bg:#fff; --panel:#f0f0f3; --panel-raised:#fff; --
 .mac-style .dialog-footer { padding:14px 20px; background:transparent; border-color:var(--line-soft); gap:10px; }
 .mac-style .protocol-picker { padding:4px 0 12px; gap:4px; border-color:var(--line-soft); }
 .mac-style .protocol-option { min-width:49px; height:58px; border-radius:7px; font-size:11px; }
-.mac-style .protocol-option.active, .mac-style .protocol-option[aria-selected=true] { background:var(--accent-soft); border-color:transparent; }
+.mac-style .protocol-option.active, .mac-style .protocol-option.selected, .mac-style .protocol-option[aria-selected=true] { background:var(--accent-soft); border-color:transparent; }
 .mac-style .protocol-option svg { width:21px; height:21px; color:var(--muted); }
 .mac-style .session-setting-tab { padding:7px 12px; border-radius:6px; border-color:transparent; font-family:inherit; }
 .mac-style .session-setting-tab.active { background:var(--panel-hover); }
