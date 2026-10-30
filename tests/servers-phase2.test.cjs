@@ -118,7 +118,7 @@ test('SSH server: Termora client shell, exec, SFTP browser and a stable host key
   const session = await terminals.open({ type: 'ssh', host: '127.0.0.1', port: server.port, ...login, cols: 100, rows: 30 });
   assert.deepEqual(fingerprints, [server.fingerprint]);
   const output = () => events.filter(event => event.channel === 'terminal:data' && event.payload.id === session.id).map(event => event.payload.data).join('');
-  terminals.write({ id: session.id, data: 'echo termora-ssh-%COMPUTERNAME:~0,0%ok\r' });
+  terminals.write({ id: session.id, data: process.platform === 'win32' ? 'echo termora-ssh-%COMPUTERNAME:~0,0%ok\r' : "printf 'termora-%s-ok\\n' ssh\r" });
   await until(() => output().includes('termora-ssh-ok'), 20000);
   const listing = await files.list({ id: session.id });
   assert.equal(listing.path, '/'); assert.deepEqual(listing.entries.map(entry => entry.name), ['hello.txt']);
@@ -182,7 +182,7 @@ test('Telnet server: negotiation, login and an interactive shell', async t => {
   assert.ok(bad.negotiation.some(([, verb, option]) => verb === 251 && option === 1), 'server offers WILL ECHO');
   const good = await run(login.password);
   assert.ok(!good.text().includes('correct horse'), 'password is not echoed');
-  good.socket.write('echo telnet-%COMPUTERNAME:~0,0%works\r\n');
+  good.socket.write(process.platform === 'win32' ? 'echo telnet-%COMPUTERNAME:~0,0%works\r\n' : "printf 'telnet-%s\\n' works\r\n");
   await until(() => good.text().includes('telnet-works'), 20000);
 });
 
