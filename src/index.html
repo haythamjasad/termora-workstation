@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <title>Termora</title>
+  <link rel="stylesheet" href="./renderer.css">
+</head>
+<body>
+  <div id="app">
+    <header class="titlebar">
+      <div class="brand"><span class="app-icon" data-classic="logo"></span><span>Termora</span></div>
+      <div class="titlebar-right"><div class="window-controls"><button id="window-minimize" aria-label="Minimize window" title="Minimize"></button><button id="window-maximize" aria-label="Maximize window" title="Maximize"></button><button id="window-close" aria-label="Close window" title="Close"></button></div></div>
+    </header>
+    <nav class="menubar" aria-label="Application menu">
+      <button class="menu-button" data-menu="terminal">Terminal</button><button class="menu-button" data-menu="sessions">Sessions</button><button class="menu-button" data-menu="view">View</button><button class="menu-button" data-menu="xserver">X server</button><button class="menu-button" data-menu="tools">Tools</button><button class="menu-button" data-menu="games">Games</button><button class="menu-button" data-menu="settings">Settings</button><button class="menu-button" data-menu="macros">Macros</button><button class="menu-button" data-menu="help">Help</button>
+    </nav>
+    <nav class="toolbar moba-toolbar" aria-label="Workspace tools">
+      <button class="toolbar-item" id="new-session" data-testid="new-session" title="Start a new session (Ctrl+N)"><span class="toolbar-icon" data-classic="session"></span><span>Session</span></button>
+      <button class="toolbar-item" id="open-servers" title="Manage local servers"><span class="toolbar-icon" data-classic="servers"></span><span>Servers</span></button>
+      <button class="toolbar-item" id="open-tools" title="Network tools"><span class="toolbar-icon" data-classic="tools"></span><span>Tools</span></button>
+      <button class="toolbar-item" disabled title="Games are not implemented in Termora"><span class="toolbar-icon" data-classic="games"></span><span>Games</span></button>
+      <button class="toolbar-item" id="toolbar-sessions" title="Show saved sessions"><span class="toolbar-icon" data-classic="sessions"></span><span>Sessions</span></button>
+      <button class="toolbar-item" id="toolbar-view" title="View options"><span class="toolbar-icon" data-classic="view"></span><span>View</span></button>
+      <button class="toolbar-item" id="toolbar-split" title="Split terminal view"><span class="toolbar-icon" data-classic="split"></span><span>Split</span></button>
+      <button class="toolbar-item hidden" id="toolbar-fullscreen" title="Maximize or restore the window"><span class="toolbar-icon" data-classic="fullscreen"></span><span>Fullscreen</span></button>
+      <button class="toolbar-item" id="toolbar-multiexec" title="Send input to multiple terminals"><span class="toolbar-icon" data-classic="multiexec"></span><span>MultiExec</span></button>
+      <button class="toolbar-item" id="open-tunnels" title="SSH tunneling"><span class="toolbar-icon" data-classic="tunneling"></span><span>Tunneling</span></button>
+      <button class="toolbar-item" disabled title="Unix package management is not implemented in Termora"><span class="toolbar-icon" data-classic="packages"></span><span>Packages</span></button>
+      <button class="toolbar-item" id="open-settings" title="Global settings" aria-label="Settings"><span class="toolbar-icon" data-classic="settings"></span><span>Settings</span></button>
+      <button class="toolbar-item" id="toolbar-help" title="Help and feature support"><span class="toolbar-icon" data-classic="help"></span><span>Help</span></button>
+      <div class="toolbar-end"><button class="toolbar-item" id="toolbar-import" title="Import Termora or MobaXterm sessions" aria-label="Import sessions"><span class="toolbar-icon" data-icon="import"></span><span>Import</span></button><button class="toolbar-item" id="toolbar-export" title="Export saved sessions" aria-label="Export sessions"><span class="toolbar-icon" data-icon="export"></span><span>Export</span></button><span class="toolbar-command-separator"></span><button class="toolbar-item" id="toolbar-xserver" title="Start an installed X server"><span class="toolbar-icon" data-classic="xserver"></span><span>X server</span></button><button class="toolbar-item" id="toolbar-exit" title="Exit Termora"><span class="toolbar-icon" data-classic="exit"></span><span>Exit</span></button></div>
+    </nav>
+    <div class="workspace">
+      <aside class="sidebar-shell">
+        <form id="quick-connect-form" class="quick-connect-form"><input id="quick-connect" placeholder="Quick connect..." aria-label="Quick connect"></form>
+        <div class="sidebar-lower">
+          <nav class="sidebar-rail" aria-label="Sidebar panels"><button class="rail-button active" id="rail-sessions" title="Sessions" aria-label="Show sessions"><span data-classic="sessions"></span></button><button class="rail-button" id="rail-files" title="File browser" aria-label="Show file browser"><span data-classic="files"></span></button><button class="rail-button" id="rail-tools" title="Tools" aria-label="Open network tools"><span data-classic="tools"></span></button><button class="rail-button" id="open-macros" title="Macros" aria-label="Open macros"><span data-classic="macros"></span></button></nav>
+          <aside class="session-sidebar" aria-label="Session explorer">
+            <div class="sidebar-heading"><span class="tree-expander">⌄</span><span class="user-sessions-icon" data-classic="usersessions"></span><span class="user-sessions-label">User sessions</span><button class="icon-button subtle" id="sidebar-add" title="Add session" aria-label="Add session">+</button></div>
+            <label class="session-search"><input id="session-filter" placeholder="Filter sessions..." aria-label="Find a session"></label>
+            <button id="show-home" class="home-nav" title="Home"><span data-classic="home"></span><span>Home</span></button>
+            <div class="section-label"><span>Saved sessions</span><span class="count" id="session-count">0</span></div>
+            <div id="sessions-list" class="sessions-list"></div>
+            <div class="sidebar-bottom"><div class="sidebar-actions"><button class="icon-button" id="import-sessions" title="Import sessions" aria-label="Import sessions"><span data-icon="import"></span></button><button class="icon-button" id="export-sessions" title="Export sessions" aria-label="Export sessions"><span data-icon="export"></span></button><button class="icon-button" id="show-coverage" title="About Termora" aria-label="About Termora"><span data-icon="info"></span></button></div></div>
+          </aside>
+          <aside id="file-sidebar" class="file-sidebar hidden" aria-label="File browser">
+            <div class="file-heading"><div><span data-icon="folder"></span><strong id="file-heading-label">Local files</strong></div><button class="icon-button" id="close-files" aria-label="Close file browser">×</button></div>
+            <form id="file-path-form" class="file-path-form"><button type="button" class="icon-button" id="file-up" aria-label="Parent directory" title="Parent directory"><span data-icon="up"></span></button><input id="file-path" aria-label="Directory path"><button class="icon-button" type="submit" title="Refresh files" aria-label="Refresh files"><span data-icon="refresh"></span></button></form>
+            <div class="file-toolbar"><button id="file-upload" class="text-button"><span data-icon="upload"></span>Upload</button><button id="file-new-folder" class="text-button" title="New folder"><span data-icon="folder-plus"></span>New folder</button><button id="file-refresh" class="icon-button" aria-label="Refresh directory"><span data-icon="refresh"></span></button></div>
+            <div id="file-entries" class="file-entries"></div><div class="file-foot" id="file-foot">Double-click a folder to open it.</div>
+          </aside>
+        </div>
+      </aside>
+      <main class="main-workspace">
+        <div class="tabbar"><div id="tabs" class="tabs" role="tablist" aria-label="Terminal tabs"><button class="tab overview-tab active" id="overview-tab" role="tab" title="Home" aria-label="Home"><span data-classic="home"></span></button></div><button class="tab-new icon-button" id="tab-add" title="New session" aria-label="New session">+</button><div class="terminal-actions"><button class="icon-button" id="toggle-files" title="Toggle file browser" aria-label="Toggle file browser"><span data-icon="folder"></span></button><button class="icon-button" id="terminal-find" title="Find in terminal (Ctrl Shift F)" aria-label="Find in terminal"><span data-icon="search"></span></button><button class="icon-button" id="terminal-split" title="Cycle terminal layout: one, two, four panes" aria-label="Change terminal layout"><span data-icon="split"></span></button><button class="icon-button" id="terminal-broadcast" title="Broadcast input to open terminals" aria-label="Broadcast input"><span data-icon="broadcast"></span></button><button class="icon-button" id="terminal-reconnect" title="Reconnect active session" aria-label="Reconnect active session"><span data-icon="refresh"></span></button></div></div>
+        <div id="terminal-search" class="terminal-search hidden"><span data-icon="search"></span><input id="terminal-search-input" placeholder="Find in terminal..." aria-label="Terminal search text"><button class="icon-button" id="search-prev" aria-label="Previous match">↑</button><button class="icon-button" id="search-next" aria-label="Next match">↓</button><button class="icon-button" id="search-close" aria-label="Close search">×</button></div>
+        <section id="home" class="home-view">
+          <button id="home-settings" class="home-settings icon-button" title="Global settings" aria-label="Home settings"><span data-classic="gear"></span></button>
+          <div class="moba-home-center">
+            <div class="moba-home-brand"><span class="home-logo" data-classic="logo"></span><span class="home-name">Termora</span></div>
+            <div class="home-start-actions"><button id="card-powershell" data-testid="open-powershell" class="button secondary"><span class="start-plus">+</span>Start local terminal</button><button id="hero-connect" class="button secondary"><span class="home-session-icon" data-classic="session"></span>New session</button></div>
+            <input id="home-session-search" class="home-session-search hidden" placeholder="Find existing session or server name..." aria-label="Find existing session or server name">
+            <div class="recent-header hidden"><div class="section-title"><h2>Recent sessions</h2><span id="saved-subtitle"></span></div><button class="text-button" id="home-import" title="Import sessions"><span data-icon="import"></span></button></div>
+            <div id="home-sessions" class="home-sessions"></div>
+            <div id="theme-chooser" class="theme-chooser"><h2>Select your favorite theme</h2><div class="theme-choices">
+              <button class="theme-choice" data-theme="light" aria-label="Use light theme"><span class="theme-preview preview-light"><i class="preview-menubar"></i><i class="preview-toolbar"></i><i class="preview-sidebar"></i><span class="preview-brand">▣ Termora</span><span class="preview-action">⊕ Start local terminal</span></span><span>Light</span></button>
+              <button class="theme-choice" data-theme="dark" aria-label="Use dark theme"><span class="theme-preview preview-dark"><i class="preview-menubar"></i><i class="preview-toolbar"></i><i class="preview-sidebar"></i><span class="preview-brand">▣ Termora</span><span class="preview-action">⊕ Start local terminal</span></span><span>Dark</span></button>
+            </div></div>
+          </div>
+          <span id="home-date" hidden></span><span id="wsl-status" hidden></span>
+        </section>
+        <div id="terminal-container" class="terminal-container hidden" data-testid="terminal-container"></div>
+        <div id="broadcast-banner" class="broadcast-banner hidden"><span data-icon="broadcast"></span>MultiExec is on — input goes to every open terminal.<button id="broadcast-stop">Turn off</button></div>
+      </main>
+    </div>
+    <footer class="statusbar"><div><strong class="status-product">TERMORA</strong><span class="status-divider"></span><span class="dot" id="status-dot"></span><span id="status-text">Ready</span><span class="status-divider"></span><span id="status-session-count">0 open sessions</span></div><div><span id="layout-status">SINGLE PANE</span><span class="status-divider"></span><span id="terminal-dimensions"></span><span id="app-version">TERMORA</span></div></footer>
+  </div>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <dialog id="app-dialog"><div id="dialog-content"></div></dialog>
+  <script src="./renderer.js"></script>
+</body>
+</html>

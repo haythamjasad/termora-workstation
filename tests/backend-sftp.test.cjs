@@ -1,0 +1,72 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const crypto = require('node:crypto');
+const { once } = require('node:events');
+const { Server, utils: { sftp: { STATUS_CODE, flagsToString } } } = require('ssh2');
+const { TerminalManager } = require('../lib/terminals.cjs');
+const { FileManager } = require('../lib/files.cjs');
+
+test('real SFTP connection browses, edits, uploads, downloads and renames files without overwriting existing uploads', { timeout: 15000 }, async t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'termora-sftp-server-'));
+  const local = fs.mkdtempSync(path.join(os.tmpdir(), 'termora-sftp-client-'));
+  fs.writeFileSync(path.join(root, 'hello.txt'), 'remote original');
+  fs.writeFileSync(path.join(local, 'upload.txt'), 'uploaded bytes');
+  const { privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048, privateKeyEncoding: { type: 'pkcs1', format: 'pem' }, publicKeyEncoding: { type: 'spki', format: 'pem' } });
+  const clients = new Set();
+  const server = new Server({ hostKeys: [privateKey] }, client => {
+    clients.add(client); client.on('error', () => {}); client.on('close', () => clients.delete(client));
+    client.on('authentication', auth => auth.accept());
+    client.on('session', accept => {
+      const session = accept();
+      session.on('sftp', acceptSftp => {
+        const sftp = acceptSftp(), handles = new Map(); let next = 1;
+        const target = value => { const resolved = path.resolve(root, '.' + path.posix.resolve('/', value)); if (resolved !== root && !resolved.startsWith(root + path.sep)) throw new Error('outside fixture'); return resolved; };
+        const attrs = stat => ({ mode: stat.mode, size: stat.size, uid: stat.uid, gid: stat.gid, atime: Math.floor(stat.atimeMs / 1000), mtime: Math.floor(stat.mtimeMs / 1000) });
+        const guard = fn => (reqid, ...args) => { try { fn(reqid, ...args); } catch (error) { sftp.status(reqid, error.code === 'ENOENT' ? STATUS_CODE.NO_SUCH_FILE : STATUS_CODE.FAILURE); } };
+        const use = handle => { const value = handles.get(handle.toString()); if (!value) throw new Error('Bad handle'); return value; };
+        sftp.on('REALPATH', guard((reqid, value) => sftp.name(reqid, [{ filename: path.posix.resolve('/', value), longname: '', attrs: {} }])));
+        sftp.on('STAT', guard((reqid, value) => sftp.attrs(reqid, attrs(fs.statSync(target(value))))));
+        sftp.on('LSTAT', guard((reqid, value) => sftp.attrs(reqid, attrs(fs.lstatSync(target(value))))));
+        sftp.on('OPENDIR', guard((reqid, value) => { const key = String(next++); handles.set(key, { directory: target(value), sent: false }); sftp.handle(reqid, Buffer.from(key)); }));
+        sftp.on('READDIR', guard((reqid, handle) => {
+          const state = use(handle); if (state.sent) { sftp.status(reqid, STATUS_CODE.EOF); return; } state.sent = true;
+          const records = fs.readdirSync(state.directory).map(name => ({ filename: name, longname: name, attrs: attrs(fs.lstatSync(path.join(state.directory, name))) }));
+          records.length ? sftp.name(reqid, records) : sftp.status(reqid, STATUS_CODE.EOF);
+        }));
+        sftp.on('OPEN', guard((reqid, filename, flags) => { const key = String(next++); handles.set(key, { fd: fs.openSync(target(filename), flagsToString(flags)) }); sftp.handle(reqid, Buffer.from(key)); }));
+        sftp.on('FSTAT', guard((reqid, handle) => sftp.attrs(reqid, attrs(fs.fstatSync(use(handle).fd)))));
+        sftp.on('READ', guard((reqid, handle, offset, length) => { const buffer = Buffer.alloc(Math.min(length, 65536)); const count = fs.readSync(use(handle).fd, buffer, 0, buffer.length, offset); count ? sftp.data(reqid, buffer.subarray(0, count)) : sftp.status(reqid, STATUS_CODE.EOF); }));
+        sftp.on('WRITE', guard((reqid, handle, offset, data) => { fs.writeSync(use(handle).fd, data, 0, data.length, offset); sftp.status(reqid, STATUS_CODE.OK); }));
+        sftp.on('CLOSE', guard((reqid, handle) => { const state = use(handle); if (state.fd !== undefined) fs.closeSync(state.fd); handles.delete(handle.toString()); sftp.status(reqid, STATUS_CODE.OK); }));
+        sftp.on('MKDIR', guard((reqid, value) => { fs.mkdirSync(target(value)); sftp.status(reqid, STATUS_CODE.OK); }));
+        sftp.on('RMDIR', guard((reqid, value) => { fs.rmdirSync(target(value)); sftp.status(reqid, STATUS_CODE.OK); }));
+        sftp.on('REMOVE', guard((reqid, value) => { fs.unlinkSync(target(value)); sftp.status(reqid, STATUS_CODE.OK); }));
+        sftp.on('RENAME', guard((reqid, from, to) => { fs.renameSync(target(from), target(to)); sftp.status(reqid, STATUS_CODE.OK); }));
+        sftp.on('close', () => { for (const state of handles.values()) if (state.fd !== undefined) { try { fs.closeSync(state.fd); } catch {} } });
+      });
+    });
+  });
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  const manager = new TerminalManager({ emit: () => {}, verifyHost: async () => true });
+  t.after(async () => { manager.closeAll(); for (const client of clients) client.end(); await new Promise(resolve => server.close(resolve)); fs.rmSync(root, { recursive: true, force: true }); fs.rmSync(local, { recursive: true, force: true }); });
+  const connection = await manager.openFiles({ type: 'sftp', host: '127.0.0.1', port: server.address().port, username: 'test', password: 'test' });
+  const files = new FileManager(manager), id = connection.id;
+  assert.equal((await files.list({ id })).entries[0].name, 'hello.txt');
+  assert.equal((await files.read({ id, path: '/hello.txt' })).content, 'remote original');
+  await files.write({ id, path: '/hello.txt', content: 'remote edited' });
+  assert.equal(fs.readFileSync(path.join(root, 'hello.txt'), 'utf8'), 'remote edited');
+  await files.upload(id, path.join(local, 'upload.txt'), '/uploaded.txt');
+  assert.equal(fs.readFileSync(path.join(root, 'uploaded.txt'), 'utf8'), 'uploaded bytes');
+  await assert.rejects(files.upload(id, path.join(local, 'upload.txt'), '/uploaded.txt'), /exists/);
+  await files.download(id, '/uploaded.txt', path.join(local, 'download.txt'));
+  assert.equal(fs.readFileSync(path.join(local, 'download.txt'), 'utf8'), 'uploaded bytes');
+  await files.action({ id, action: 'rename', path: '/uploaded.txt', newPath: '/renamed.txt' });
+  await files.action({ id, action: 'mkdir', path: '/directory' });
+  const entries = (await files.list({ id, path: '/' })).entries;
+  assert.equal(entries[0].name, 'directory'); assert.ok(entries.some(entry => entry.name === 'renamed.txt'));
+  await files.action({ id, action: 'delete', path: '/renamed.txt' });
+  assert.equal(fs.existsSync(path.join(root, 'renamed.txt')), false);
+});

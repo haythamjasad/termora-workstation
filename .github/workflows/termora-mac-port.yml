@@ -1,0 +1,32 @@
+name: Termora Windows codebase on Intel Mac
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['electron/**', 'lib/**', 'src/**', 'extensions/**', 'package*.json', 'scripts/**', '.github/workflows/termora-mac-port.yml']
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Build and test the original application on macOS
+        shell: bash
+        run: bash scripts/build-mac-port.sh 2>&1 | tee mac-port-build.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Termora-Workstation-macOS-Intel
+          path: release/Termora-Workstation-macOS-Intel.dmg
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Mac-port-diagnostics
+          path: |
+            mac-port-build.log
+            release/Termora-macOS-home.png

@@ -1,0 +1,37 @@
+{
+  "name": "termora-workstation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An independent Windows terminal and remote-session workstation",
+  "main": "electron/main.cjs",
+  "author": "Termora contributors",
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/start.mjs",
+    "test": "node --test tests/*.test.cjs",
+    "test:desktop": "node scripts/verify-desktop.mjs",
+    "test:ui": "node scripts/verify-ui.mjs",
+    "package": "node scripts/package.mjs",
+    "package:mac": "node scripts/package-mac.mjs",
+    "package:mac:signed": "node scripts/package-signed-mac.mjs",
+    "package:mac:native-installer": "node scripts/package-native-installer.mjs",
+    "package:dmg": "node scripts/package-dmg.mjs"
+  },
+  "dependencies": {
+    "@lydell/node-pty": "1.2.0-beta.15",
+    "@novnc/novnc": "1.7.0",
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/addon-search": "0.16.0",
+    "@xterm/xterm": "6.0.0",
+    "basic-ftp": "6.2.3",
+    "serialport": "13.0.0",
+    "ssh2": "1.17.0"
+  },
+  "devDependencies": {
+    "electron": "45.0.0",
+    "esbuild": "0.28.2",
+    "extract-zip": "2.0.1",
+    "playwright": "1.64.1"
+  }
+}

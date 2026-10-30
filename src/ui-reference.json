@@ -1,0 +1,455 @@
+{
+  "sourceSha256": "f0e77836182fe52e66c68f88fbe13801f935f100623103df1d8be2181294e8e5",
+  "sessionOptions": {
+    "ssh": [
+      {
+        "label": "Do not exit after command ends",
+        "checked": false
+      },
+      {
+        "label": "X11-Forwarding",
+        "checked": false
+      },
+      {
+        "label": "Compression",
+        "checked": false
+      },
+      {
+        "label": "Use private key",
+        "checked": false
+      },
+      {
+        "label": "Try to follow SSH path in browser",
+        "checked": false
+      }
+    ],
+    "telnet": [
+      {
+        "label": "Enable Telnet KeepAlive",
+        "checked": false
+      },
+      {
+        "label": "<Return> key sends <newline> telnet code instead of <ctrl+M>",
+        "checked": false
+      }
+    ],
+    "rsh": [],
+    "xdmcp": [
+      {
+        "label": "Enable font server",
+        "checked": false
+      },
+      {
+        "label": "Set Numlock off",
+        "checked": false
+      },
+      {
+        "label": "Indirect mode (displays the XDMCP \"chooser\" of the specified server)",
+        "checked": false
+      }
+    ],
+    "rdp": [
+      {
+        "label": "Smart sizing",
+        "checked": false
+      },
+      {
+        "label": "Enable compression",
+        "checked": false
+      },
+      {
+        "label": "Autoscale",
+        "checked": false
+      },
+      {
+        "label": "Enhanced graphics",
+        "checked": false
+      },
+      {
+        "label": "Redirect ports",
+        "checked": false
+      },
+      {
+        "label": "Redirect smartcards",
+        "checked": false
+      },
+      {
+        "label": "Share local/remote clipboards",
+        "checked": false
+      },
+      {
+        "label": "Redirect printers",
+        "checked": false
+      },
+      {
+        "label": "Redirect drives",
+        "checked": false
+      },
+      {
+        "label": "Redirect microphone",
+        "checked": false
+      },
+      {
+        "label": "Native authentication",
+        "checked": false
+      },
+      {
+        "label": "Forward keyboard shortcuts",
+        "checked": false
+      },
+      {
+        "label": "Admin console",
+        "checked": false
+      },
+      {
+        "label": "Redirect webauthn",
+        "checked": false
+      }
+    ],
+    "vnc": [
+      {
+        "label": "Auto scale display to fit the terminal size without scrollbars",
+        "checked": false
+      },
+      {
+        "label": "View only (disable mouse and keyboard inputs)",
+        "checked": false
+      },
+      {
+        "label": "Display VNC settings bar",
+        "checked": false
+      },
+      {
+        "label": "Use new embedded VNC engine",
+        "checked": false
+      },
+      {
+        "label": "Use SSL tunneling to secure the connection",
+        "checked": false
+      },
+      {
+        "label": "Use IPv6",
+        "checked": false
+      }
+    ],
+    "ftp": [
+      {
+        "label": "Passive mode",
+        "checked": false
+      },
+      {
+        "label": "FTPS mode",
+        "checked": false
+      },
+      {
+        "label": "Encrypt data channel",
+        "checked": false
+      },
+      {
+        "label": "ASCII mode",
+        "checked": false
+      },
+      {
+        "label": "SSL2",
+        "checked": false
+      },
+      {
+        "label": "SSL3",
+        "checked": false
+      },
+      {
+        "label": "TLS1",
+        "checked": false
+      },
+      {
+        "label": "TLS1.1",
+        "checked": false
+      },
+      {
+        "label": "TLS1.2",
+        "checked": false
+      },
+      {
+        "label": "Implicit SSL",
+        "checked": false
+      },
+      {
+        "label": "TLS1.3",
+        "checked": false
+      }
+    ],
+    "sftp": [
+      {
+        "label": "UTF-8 Charset",
+        "checked": false
+      },
+      {
+        "label": "Compression",
+        "checked": false
+      },
+      {
+        "label": "ASCII mode",
+        "checked": false
+      },
+      {
+        "label": "Use private key",
+        "checked": false
+      },
+      {
+        "label": "2-steps authentication",
+        "checked": false
+      },
+      {
+        "label": "Preserve files dates",
+        "checked": false
+      }
+    ],
+    "serial": [],
+    "file": [
+      {
+        "label": "Try to open the file/folder/url into a MobaXterm tab (experimental)",
+        "checked": false
+      }
+    ],
+    "local": [],
+    "browser": [
+      {
+        "label": "Display top bar",
+        "checked": false
+      },
+      {
+        "label": "Display back button",
+        "checked": false
+      },
+      {
+        "label": "Display forward button",
+        "checked": false
+      },
+      {
+        "label": "Display refresh button",
+        "checked": false
+      },
+      {
+        "label": "Display stop button",
+        "checked": false
+      },
+      {
+        "label": "Display home button",
+        "checked": false
+      },
+      {
+        "label": "Display address bar",
+        "checked": false
+      },
+      {
+        "label": "Disable external popup windows",
+        "checked": false
+      },
+      {
+        "label": "Display top bar",
+        "checked": false
+      },
+      {
+        "label": "Enable external popup windows",
+        "checked": false
+      },
+      {
+        "label": "Enable Smartscreen",
+        "checked": false
+      },
+      {
+        "label": "Allow insecure localhost",
+        "checked": false
+      },
+      {
+        "label": "Use Edge stored passwords",
+        "checked": false
+      },
+      {
+        "label": "Enable context menus",
+        "checked": false
+      }
+    ],
+    "mosh": [
+      {
+        "label": "Use SSH private key :",
+        "checked": false
+      }
+    ],
+    "s3": [],
+    "wsl": []
+  },
+  "settingsTabs": [
+    {
+      "name": "General",
+      "groups": [],
+      "options": [
+        "Automatically backup MobaXterm configuration file"
+      ]
+    },
+    {
+      "name": "Terminal",
+      "groups": [
+        {
+          "name": "Local shell settings",
+          "options": [
+            "Use Windows PATH",
+            "Backspace sends ^H"
+          ]
+        },
+        {
+          "name": "Default terminal look and feel",
+          "options": []
+        },
+        {
+          "name": "Terminal features",
+          "options": [
+            "Paste using right-click",
+            "Log terminal output to the following directory",
+            "Close prompt"
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "X11",
+      "groups": [
+        {
+          "name": "X11 extensions (for advanced users only)",
+          "options": [
+            "Composite",
+            "Damage",
+            "Randr",
+            "Xfixes",
+            "Xtest",
+            "Xinerama",
+            "DirectDraw"
+          ]
+        },
+        {
+          "name": "X11 settings",
+          "options": [
+            "Unix-compatible keyboard"
+          ]
+        },
+        {
+          "name": "Server settings",
+          "options": [
+            "Automatically start X server at MobaXterm start up"
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "SSH",
+      "groups": [
+        {
+          "name": "SSH-browser settings",
+          "options": [
+            "Enable graphical SSH-browser",
+            "Automatically switch to SSH-browser tab after login",
+            "Remote-monitoring",
+            "Preserve files dates during SSH-browser transfers"
+          ]
+        },
+        {
+          "name": "SSH settings",
+          "options": [
+            "Display SSH banner",
+            "GSSAPI Kerberos",
+            "Use 2-factor authentication for SSH gateways",
+            "SSH keepalive",
+            "Validate host identity at first connection"
+          ]
+        },
+        {
+          "name": "SSH agents",
+          "options": [
+            "Use internal SSH agent \"MobAgent\"",
+            "Use PuTTY agent",
+            "Prompt before serving keys",
+            "Use Windows SSH agent"
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Display",
+      "groups": [],
+      "options": [
+        "Rounded tabs",
+        "Show tab numbers",
+        "Show close buttons",
+        "Disable \"Quick connect\" when sidebar is hidden",
+        "Show green/orange buttons next to each open session in the sessions tree"
+      ]
+    },
+    {
+      "name": "Toolbar",
+      "groups": [],
+      "options": []
+    },
+    {
+      "name": "Misc",
+      "groups": [
+        {
+          "name": "Tabs",
+          "options": [
+            "Home tab is replaced when starting new tab",
+            "Do not exit MobaXterm when last tab is closed"
+          ]
+        },
+        {
+          "name": "Popup terminal",
+          "options": [
+            "Popup terminal is sizeable",
+            "Try to open the popup terminal in current Windows explorer folder",
+            "Hide popup terminal instead of closing it"
+          ]
+        }
+      ],
+      "options": [
+        "Allow multiple instances of MobaXterm"
+      ]
+    },
+    {
+      "name": "Security",
+      "groups": [
+        {
+          "name": "Passwords management",
+          "options": [
+            "Disable \"show passwords\"",
+            "No SSH keys passwd cache",
+            "Disable passwords saving",
+            "Disable RDP \"reconnect\"",
+            "Do not store master password"
+          ]
+        },
+        {
+          "name": "Misc features",
+          "options": [
+            "Disable settings edition",
+            "Disable X11 autostart",
+            "Disable log"
+          ]
+        },
+        {
+          "name": "Disable sessions",
+          "options": []
+        },
+        {
+          "name": "Disable embedded servers",
+          "options": []
+        },
+        {
+          "name": "Disable embedded tools",
+          "options": []
+        }
+      ],
+      "options": []
+    }
+  ]
+}
