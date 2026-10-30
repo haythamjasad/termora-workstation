@@ -2,11 +2,12 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { SearchAddon } from '@xterm/addon-search';
 import RFB from '@novnc/novnc';
-import { classicIcon } from './classic-icons.js';
+import { classicIcon as windowsClassicIcon } from './classic-icons.js';
 import uiReference from './ui-reference.json';
 import { configurationMarkup } from './classic-settings.js';
 import { createHighlighter } from '../lib/highlight.cjs';
 import './styles.css';
+import './macos.css';
 
 const paths = {
   plus: '<path d="M12 5v14M5 12h14"/>', close: '<path d="m6 6 12 12M18 6 6 18"/>',
@@ -51,6 +52,11 @@ let bridge;
 const detachedMode = location.hash === '#detached';
 let modalCleanup = null;
 let contextMenu = null;
+function classicIcon(name) {
+  if (state.platform !== 'darwin') return windowsClassicIcon(name);
+  const names = {logo:'terminal',session:'plus',sessions:'folder',usersessions:'folder',files:'folder',shell:'terminal',ssh:'terminal',telnet:'terminal',rsh:'terminal',mosh:'terminal',serial:'terminal',rdp:'monitor',vnc:'monitor',browser:'monitor',ftp:'folder',sftp:'folder',s3:'folder',tools:'activity',servers:'server',tunneling:'route',macros:'code',multiexec:'broadcast',view:'grid',help:'info',home:'home',exit:'close',xserver:'monitor',xdmcp:'monitor'};
+  return svg(names[name] || name);
+}
 
 function icons(root = document) {
   $$('[data-classic]', root).forEach(node => { node.innerHTML = classicIcon(node.dataset.classic); });
@@ -908,7 +914,17 @@ async function initialize(){
   if(!bridge){$('#status-text').textContent='Desktop connection unavailable';$('#status-dot').style.background='var(--danger)';toast('Open Termora through the desktop launcher to use terminal and file features.',true);return;}
   bridge.onTerminalData(event=>{const entry=state.terminals.get(event.id);if(entry?.term)entry.term.write(terminalText(entry,event.data));else if(!entry)state.buffered.set(event.id,((state.buffered.get(event.id)||'')+event.data).slice(-1024*1024));});bridge.onTerminalExit(event=>{vncChannels.get(event.id)?.ended();vncChannels.delete(event.id);terminalExited(event);});bridge.onVncData(({id,data})=>vncChannels.get(id)?.receive(data));
   const data=await bridge.bootstrap();Object.assign(state,{sessions:data.sessions||[],settings:{...state.settings,...data.settings},macros:data.macros||[],tunnels:data.tunnels||[],homePath:data.homePath||'',capabilities:data.capabilities||{},appName:data.appName||'Termora',platform:data.platform||'win32',version:data.version||'0.1.0',vault:data.vault||{available:false,saved:[]},logDirectory:data.logDirectory||''});
-  $('#app-version').textContent=`TERMORA ${state.version}`;$('#wsl-status').innerHTML=`<span class="dot amber-dot"></span>${capability('wsl')?'WINDOWS SUBSYSTEM':'REQUIRES WSL'}`;
+  document.body.classList.toggle('mac-style', state.platform === 'darwin');
+  if (state.platform === 'darwin') {
+    icons();
+    const subtitle=element('p','mac-home-subtitle','Your terminals and remote connections.');
+    $('.moba-home-brand')?.after(subtitle);
+  }
+  bridge.onAppMenu?.(action=>{
+    if(action === 'close-active-tab') $('.tab.active .tab-close')?.click();
+    else document.getElementById(action)?.click();
+  });
+  $('#app-version').textContent=`TERMORA ${state.version}`;$('#wsl-status').innerHTML=state.platform === 'darwin' ? '<span class="dot"></span>macOS' : `<span class="dot amber-dot"></span>${capability('wsl')?'WINDOWS SUBSYSTEM':'REQUIRES WSL'}`;
   applySettings();bindEvents();renderSessions();renderWorkspace();
   if(detachedMode)await initializeDetached();
   else {

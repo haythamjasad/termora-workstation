@@ -14,6 +14,9 @@ try {
   const bootstrap = await page.evaluate(()=>window.bridge.bootstrap());
   assert.equal(bootstrap.platform,'darwin');
   assert.equal(bootstrap.capabilities.rdp,true,'Bundled RDP engine must be available');
+  assert.equal(await page.evaluate(()=>document.body.classList.contains('mac-style')),true);
+  assert.equal(await page.locator('.menubar').isVisible(),false);
+  assert.equal(await application.evaluate(({Menu})=>Menu.getApplicationMenu().items.some(item=>item.label==='File')),true);
   assert.equal(await page.locator('.menu-button').count() > 5,true);
   await page.evaluate(()=>{window.__macPortOutput='';window.bridge.onTerminalData(event=>window.__macPortOutput+=event.data);});
   const terminal = await page.evaluate(()=>window.bridge.openTerminal({type:'local',name:'Mac test',shell:'default',cols:100,rows:30}));
@@ -21,5 +24,9 @@ try {
   await page.waitForFunction(()=>window.__macPortOutput.includes('TERMORA_MAC_PTY_OK'),null,{timeout:20000});
   await page.evaluate(id=>window.bridge.closeTerminal(id),terminal.id);
   await page.screenshot({path:'release/Termora-macOS-home.png'});
+  await application.evaluate(({Menu})=>Menu.getApplicationMenu().items.find(item=>item.label==='File').submenu.items.find(item=>item.label==='New Connection…').click());
+  await page.locator('dialog[open]').waitFor();
+  await page.screenshot({path:'release/Termora-macOS-session.png'});
+  await page.locator('#dialog-cancel').click();
   console.log('PASS packaged Windows-codebase Mac UI, bridge, bundled RDP detection, real local PTY');
 } finally {await application.close();}

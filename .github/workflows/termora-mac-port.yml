@@ -30,3 +30,4 @@ jobs:
           path: |
             mac-port-build.log
             release/Termora-macOS-home.png
+            release/Termora-macOS-session.png

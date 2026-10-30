@@ -1,0 +1,75 @@
+/* Mac presentation shares the same feature controls and connection handlers. */
+body.mac-style { font: 13px -apple-system, BlinkMacSystemFont, sans-serif; --bg:#1e1e20; --panel:#28282b; --panel-raised:#38383c; --panel-hover:#414145; --line:#48484c; --line-soft:#363639; --text:#ededf0; --muted:#b0b0b7; --faint:#85858d; --accent:#0a84ff; --accent-soft:#164575; --shadow:0 18px 60px #0007; }
+body.mac-style.theme-light { --bg:#fff; --panel:#f0f0f3; --panel-raised:#fff; --panel-hover:#e2e2e7; --line:#d1d1d6; --line-soft:#e4e4e8; --text:#222225; --muted:#64646c; --faint:#8c8c94; --accent:#007aff; --accent-soft:#d8e9ff; }
+.mac-style .titlebar { height:52px; min-height:52px; padding:0 100px; justify-content:center; background:var(--panel); color:var(--text); border-bottom:1px solid var(--line-soft); }
+.mac-style .brand { font:600 13px -apple-system, BlinkMacSystemFont, sans-serif; }
+.mac-style .brand .app-icon { display:none; }
+.mac-style .window-controls, .mac-style .menubar { display:none; }
+.mac-style .titlebar-right { position:absolute; right:20px; }
+.mac-style .toolbar { height:54px; min-height:54px; padding:4px 16px; gap:5px; border-bottom:1px solid var(--line-soft); }
+.mac-style .toolbar-item { height:44px; min-width:48px; padding:4px 9px; border-radius:7px; font-size:10px; gap:2px; }
+.mac-style .toolbar-item:hover:not(:disabled), .mac-style .toolbar-item.active { background:var(--panel-hover); border-color:transparent; }
+.mac-style .toolbar-icon, .mac-style .toolbar-icon svg { width:19px; height:19px; color:var(--muted); }
+.mac-style .toolbar-end { gap:5px; }
+.mac-style .toolbar-item:disabled, .mac-style #toolbar-exit, .mac-style #toolbar-help { display:none; }
+.mac-style .sidebar-shell { width:260px; min-width:210px; background:var(--panel); border-right:1px solid var(--line-soft); }
+.mac-style .quick-connect-form { padding:12px 12px 6px; }
+.mac-style .quick-connect-form input { height:30px; border:0; border-radius:7px; padding:6px 10px; background:var(--panel-hover); }
+.mac-style .sidebar-rail { width:38px; min-width:38px; padding:8px 4px; background:transparent; }
+.mac-style .rail-button { width:30px; height:32px; border:0; border-radius:6px; margin-bottom:5px; background:transparent; }
+.mac-style .rail-button.active { background:var(--panel-hover); }
+.mac-style .rail-button svg { width:18px; height:18px; color:var(--muted); }
+.mac-style .sidebar-heading { height:38px; font-weight:600; padding:6px 8px; color:var(--muted); }
+.mac-style .user-sessions-label { background:transparent; font-size:12px; }
+.mac-style .session-row { height:31px; padding:5px 8px; margin:2px 6px; border-radius:6px; font-size:13px; }
+.mac-style .session-row:hover { background:var(--panel-hover); }
+.mac-style .session-row svg { width:17px; height:17px; color:var(--accent); }
+.mac-style .session-group { margin-top:8px; }
+.mac-style .tabbar { height:38px; min-height:38px; align-items:center; padding:4px 8px; gap:4px; border-color:var(--line-soft); background:var(--panel); }
+.mac-style .tab { height:29px; border:0; border-radius:6px; clip-path:none; padding:5px 12px; background:transparent; font-size:12px; }
+.mac-style .tab.active { background:var(--panel-hover); box-shadow:0 1px 3px #0002; }
+.mac-style .tabs { height:30px; align-items:center; }
+.mac-style .tab.active { height:29px; margin-bottom:0; padding-bottom:5px; }
+.mac-style .tab-new { height:26px; border:0; border-radius:5px; clip-path:none; background:transparent; }
+.mac-style .home-view { background:var(--bg); }
+.mac-style .moba-home-brand { flex-direction:column; gap:16px; }
+.mac-style .home-logo svg { width:64px; height:64px; color:var(--muted); stroke-width:1.1; }
+.mac-style .home-name { font:500 30px -apple-system, BlinkMacSystemFont, sans-serif; }
+.mac-style .home-start-actions { gap:12px; margin-bottom:28px; }
+.mac-style .home-start-actions .button { width:auto; min-width:160px; height:34px; font:13px -apple-system, BlinkMacSystemFont, sans-serif; border-radius:7px; }
+.mac-style .theme-chooser { display:none; }
+.mac-style .mac-home-subtitle { color:var(--muted); font-size:14px; margin:0 0 28px; }
+.mac-style .theme-chooser h3 { font-size:13px; font-weight:500; color:var(--muted); }
+.mac-style .theme-choice { border-radius:10px; padding:8px; }
+.mac-style .theme-preview { border-radius:7px; overflow:hidden; }
+.mac-style .button { min-height:29px; border:1px solid var(--line); border-radius:6px; background:var(--panel-raised); color:var(--text); padding:5px 14px; box-shadow:0 1px 2px #0002; font:13px -apple-system, BlinkMacSystemFont, sans-serif; }
+.mac-style .button:hover:not(:disabled) { background:var(--panel-hover); border-color:var(--line); }
+.mac-style .button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+.mac-style .button.primary:hover { filter:brightness(1.1); }
+.mac-style input, .mac-style select, .mac-style textarea { border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--text); font-family:-apple-system, BlinkMacSystemFont, sans-serif; }
+.mac-style input:focus-visible, .mac-style select:focus-visible, .mac-style textarea:focus-visible { outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent); outline-offset:1px; border-color:var(--accent); }
+.mac-style input[type=checkbox] { accent-color:var(--accent); }
+.mac-style .field > input, .mac-style .field > select { height:30px; padding:5px 8px; font-size:13px; }
+.mac-style .field > label, .mac-style .field-label { font-size:12px; color:var(--muted); }
+.mac-style dialog { border:1px solid var(--line); border-radius:13px; box-shadow:var(--shadow); background:var(--panel); font:13px -apple-system, BlinkMacSystemFont, sans-serif; }
+.mac-style dialog::backdrop { background:#0005; backdrop-filter:blur(3px); }
+.mac-style .dialog-header { min-height:48px; padding:12px 20px; background:transparent; border-color:var(--line-soft); }
+.mac-style .dialog-title { font-size:14px; font-weight:600; }
+.mac-style .dialog-header .icon-button { border-radius:50%; background:var(--panel-hover); }
+.mac-style .dialog-header .icon-button:hover { background:var(--line); }
+.mac-style .dialog-body { padding:20px; }
+.mac-style .dialog-footer { padding:14px 20px; background:transparent; border-color:var(--line-soft); gap:10px; }
+.mac-style .protocol-picker { padding:4px 0 12px; gap:4px; border-color:var(--line-soft); }
+.mac-style .protocol-option { min-width:49px; height:58px; border-radius:7px; font-size:11px; }
+.mac-style .protocol-option.active, .mac-style .protocol-option[aria-selected=true] { background:var(--accent-soft); border-color:transparent; }
+.mac-style .protocol-option svg { width:21px; height:21px; color:var(--muted); }
+.mac-style .session-setting-tab { padding:7px 12px; border-radius:6px; border-color:transparent; font-family:inherit; }
+.mac-style .session-setting-tab.active { background:var(--panel-hover); }
+.mac-style fieldset { border:1px solid var(--line-soft); border-radius:8px; padding:14px; }
+.mac-style .info-box { border-radius:7px; border-color:var(--line-soft); background:var(--bg); font-size:12px; line-height:1.5; }
+.mac-style .statusbar { height:25px; min-height:25px; border-color:var(--line-soft); background:var(--panel); font-size:10px; color:var(--muted); }
+.mac-style .file-heading { height:40px; padding:8px; }
+.mac-style .file-row { min-height:29px; border-radius:5px; }
+.mac-style table { font:12px -apple-system, BlinkMacSystemFont, sans-serif; }
+.mac-style .context-menu, .mac-style .app-menu { border:1px solid var(--line); border-radius:9px; background:var(--panel); box-shadow:var(--shadow); padding:5px; }
+.mac-style .context-menu button, .mac-style .app-menu button { border-radius:5px; min-height:27px; }

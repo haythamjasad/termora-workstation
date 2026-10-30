@@ -44,7 +44,7 @@ function safeConfig(config = {}) { const { password, passphrase, gatewayPassword
 function detachTerminal({ id, label, kind, config, history } = {}) {
   terminals.session(id);
   if (owners.has(id)) throw new Error('This tab is already detached.');
-  const child = new BrowserWindow({ width: 960, height: 620, minWidth: 420, minHeight: 260, title: String(label || 'Terminal'), backgroundColor: '#000000', frame: false, show: process.env.TERMORA_TEST_MODE !== 'hidden',
+  const child = new BrowserWindow({ width: 960, height: 620, minWidth: 420, minHeight: 260, title: String(label || 'Terminal'), backgroundColor: '#000000', frame: process.platform === 'darwin', ...(process.platform === 'darwin' ? {titleBarStyle:'hiddenInset',trafficLightPosition:{x:18,y:18}} : {}), show: process.env.TERMORA_TEST_MODE !== 'hidden',
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true } });
   const record = { window: child, terminalId: id, payload: { id, label: String(label || 'Terminal').slice(0, 200), kind: String(kind || ''), config: safeConfig(config), history: String(history || '').slice(-2 * 1024 * 1024) }, reattached: false };
   const contentsId = child.webContents.id;
@@ -212,7 +212,7 @@ function registerIPC() {
   handle('window:reattach', (event, payload) => reattachTerminal(payload, event), { withEvent: true });
 }
 function createWindow() {
-  window = new BrowserWindow({ width: 1440, height: 930, minWidth: 1000, minHeight: 650, title: 'Termora', backgroundColor: '#202020', show: process.env.TERMORA_TEST_MODE !== 'hidden', frame: false,
+  window = new BrowserWindow({ width: 1440, height: 930, minWidth: 1000, minHeight: 650, title: 'Termora', backgroundColor: '#202020', show: process.env.TERMORA_TEST_MODE !== 'hidden', frame: process.platform === 'darwin', ...(process.platform === 'darwin' ? {titleBarStyle:'hiddenInset',trafficLightPosition:{x:18,y:18}} : {}),
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true, devTools: true } });
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   window.webContents.on('will-navigate', (event, url) => { if (url.split('#')[0] !== rendererURL) event.preventDefault(); });
@@ -223,7 +223,16 @@ function createWindow() {
 app.whenReady().then(() => { if (!primaryInstance) return; store = new StateStore(app.getPath('userData')); tools = installedTools(); terminals = new TerminalManager({ emit, store, verifyHost }); vault = new CredentialVault(store, safeStorage); applyLogging(store.read().settings); files = new FileManager(terminals);
   servers = new ServerManager({ dataDir: app.getPath('userData'), cronJobs: () => store.read().cronJobs || [], onCronResult: result => { if (window && !window.isDestroyed()) window.webContents.send('cron:result', result); } });
   // macOS routes Cmd+C/V/A/Q through the application menu, so keep a minimal one there.
-  Menu.setApplicationMenu(process.platform === 'darwin' ? Menu.buildFromTemplate([{ role: 'appMenu' }, { role: 'editMenu' }, { role: 'windowMenu' }]) : null);
+  const command = (label, action, accelerator) => ({label, accelerator, click:()=>{if(window && !window.isDestroyed()) window.webContents.send('app:menu',action);}});
+  Menu.setApplicationMenu(process.platform === 'darwin' ? Menu.buildFromTemplate([
+    {label:'Termora',submenu:[{role:'about'}, {type:'separator'}, command('Settings…','open-settings','Command+,'), {type:'separator'}, {role:'services'}, {type:'separator'}, {role:'hide'}, {role:'hideOthers'}, {role:'unhide'}, {type:'separator'}, {role:'quit'}]},
+    {label:'File',submenu:[command('New Local Terminal','card-powershell','Command+T'),command('New Connection…','new-session','Command+N'),{type:'separator'},command('Import Connections…','toolbar-import','Command+Shift+I'),command('Export Connections…','toolbar-export','Command+Shift+E'),{type:'separator'},command('Close Tab','close-active-tab','Command+W')]},
+    {role:'editMenu'},
+    {label:'View',submenu:[command('Saved Sessions','toolbar-sessions'),command('File Browser','rail-files','Command+Shift+F'),command('Split Terminals','toolbar-split'),command('Broadcast Input','toolbar-multiexec'),{type:'separator'},{role:'togglefullscreen'}]},
+    {label:'Tools',submenu:[command('Servers…','open-servers'),command('SSH Tunnels…','open-tunnels'),command('Network Tools…','open-tools'),command('Macros…','open-macros'),command('Start X Server','toolbar-xserver')]},
+    {role:'windowMenu'},
+    {role:'help',submenu:[command('Termora Features','show-coverage')]}
+  ]) : null);
   registerIPC(); createWindow(); });
 app.on('window-all-closed', () => { terminals?.closeAll(); app.quit(); });
 app.on('before-quit', event => {
