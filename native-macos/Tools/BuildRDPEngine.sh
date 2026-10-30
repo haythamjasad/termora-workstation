@@ -22,4 +22,7 @@ cmake -S "$SOURCE" -B "$SOURCE/build" \
   -DWITH_JPEG=OFF -DBUILD_TESTING=OFF -DWITH_ABSOLUTE_PLUGIN_LOAD_PATHS=OFF
 cmake --build "$SOURCE/build" --parallel 3
 cmake --install "$SOURCE/build"
+CLIENT="$(find "$DEST/bin" -type f -name 'sdl*freerdp*' -print -quit)"
+if [[ -z "$CLIENT" ]]; then echo "The SDL RDP client was not installed."; exit 1; fi
+if [[ "$CLIENT" != "$DEST/bin/sdl3-freerdp" ]]; then cp "$CLIENT" "$DEST/bin/sdl3-freerdp"; fi
 "$DEST/bin/sdl3-freerdp" /version
