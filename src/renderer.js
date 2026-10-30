@@ -921,7 +921,13 @@ async function initialize(){
     $('.moba-home-brand')?.after(subtitle);
   }
   bridge.onAppMenu?.(action=>{
-    if(action === 'close-active-tab') $('.tab.active .tab-close')?.click();
+    if(action.startsWith('terminal:')) {
+      const item=menuItems('terminal').find(item=>item?.[0]===action.slice(9));
+      if(typeof item?.[2]==='function') Promise.resolve(item[2]()).catch(error=>toast(message(error),true));
+    }
+    else if(action === 'close-active-tab') {
+      if(state.active) closeTerminal(state.active); else bridge.windowAction('close');
+    }
     else document.getElementById(action)?.click();
   });
   $('#app-version').textContent=`TERMORA ${state.version}`;$('#wsl-status').innerHTML=state.platform === 'darwin' ? '<span class="dot"></span>macOS' : `<span class="dot amber-dot"></span>${capability('wsl')?'WINDOWS SUBSYSTEM':'REQUIRES WSL'}`;
