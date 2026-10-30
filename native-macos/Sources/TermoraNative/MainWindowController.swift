@@ -153,7 +153,7 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSOutlin
     private func open(_ session: Session) {
         do {
             try session.validate()
-            if [.vnc, .rdp, .browser].contains(session.type) { try openExternal(session); return }
+            if [.vnc, .browser].contains(session.type) { try openExternal(session); return }
             let terminal = TerminalController(session: session)
             let item = NSTabViewItem(viewController: terminal); item.label = session.name
             terminal.titleChanged = { [weak item] title in if !title.isEmpty { item?.label = title } }
@@ -169,32 +169,6 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSOutlin
             if !session.username.isEmpty { parts.user = session.username }
             guard let url = parts.url, NSWorkspace.shared.open(url) else { throw NativeError("Could not open macOS Screen Sharing.") }; return
         }
-        let host = session.host.contains(":") ? "[\(session.host)]" : session.host
-        var content = "full address:s:\(host):\(session.port)\r\nprompt for credentials:i:1\r\n"
-        if !session.username.isEmpty { content += "username:s:\(session.username)\r\n" }
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("Termora-\(UUID().uuidString).rdp")
-        guard let bytes = content.data(using: .utf16LittleEndian) else { throw NativeError("Could not encode the RDP connection.") }
-        try (Data([0xff, 0xfe]) + bytes).write(to: url, options: .atomic)
-        try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: url.path)
-        // Create the document before asking Launch Services to resolve its handler.
-        // Prefer Windows App explicitly when the .rdp association is missing or stale.
-        let applicationFolders = [URL(fileURLWithPath: "/Applications", isDirectory: true), FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications", isDirectory: true)]
-        let candidates = applicationFolders.flatMap { folder in
-            ["Windows App.app", "Microsoft Remote Desktop.app"].map { folder.appendingPathComponent($0, isDirectory: true) }
-        }
-        let application = candidates.first { FileManager.default.fileExists(atPath: $0.appendingPathComponent("Contents/Info.plist").path) }
-            ?? NSWorkspace.shared.urlForApplication(toOpen: url)
-        guard let application else {
-            try? FileManager.default.removeItem(at: url)
-            throw NativeError("Windows App could not be found. Put Windows App in Applications, open it once, then retry. Termora also supports an application associated with .rdp files.")
-        }
-        let configuration = NSWorkspace.OpenConfiguration()
-        NSWorkspace.shared.open([url], withApplicationAt: application, configuration: configuration) { [weak self] _, error in
-            if let error {
-                DispatchQueue.main.async { self?.present(NativeError("Could not open the RDP connection in \(application.deletingPathExtension().lastPathComponent): \(error.localizedDescription)")) }
-            }
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 120) { try? FileManager.default.removeItem(at: url) }
     }
     @objc func closeTab() {
         guard tabs.selectedTabViewItemIndex >= 0 else { return }
@@ -241,7 +215,7 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSOutlin
     private func present(_ error: Error) { NSAlert(error: error).runModal() }
     @objc func showFeatures() {
         let alert = NSAlert(); alert.messageText = "Termora Native"
-        alert.informativeText = "Swift and AppKit windows, native terminal rendering, local shells, SSH, SFTP terminal, serial terminal, saved connections and folders, JSON and MobaXterm import, Screen Sharing, and RDP/browser launchers.\n\nThis first native implementation does not yet include the Electron app’s graphical remote file browser, embedded RDP/VNC, S3, Mosh, server management, tunnels UI, macros, or scheduler."
+        alert.informativeText = "Swift and AppKit windows, native terminal rendering, local shells, SSH, SFTP terminal, serial terminal, saved connections and folders, JSON and MobaXterm import, Screen Sharing, bundled FreeRDP desktop connections, and browser launchers.\n\nThis first native implementation does not yet include the Electron app’s graphical remote file browser, embedded RDP/VNC, S3, Mosh, server management, tunnels UI, macros, or scheduler."
         alert.runModal()
     }
     @objc func importSessions() {

@@ -17,6 +17,7 @@ trap cleanup EXIT
 hdiutil verify "$DMG"
 hdiutil attach -readonly -nobrowse -mountpoint "$MOUNT" "$DMG"
 APP="$MOUNT/Termora Native.app"
+"$APP/Contents/Helpers/TermoraRDP" /version
 codesign --verify --deep --strict --verbose=2 "$APP"
 lipo "$APP/Contents/MacOS/TermoraNative" -verify_arch x86_64
 echo "Testing the packaged native window and local terminal..."

@@ -42,6 +42,7 @@ printf 'import XCTest\n' > "$ROOT/Builds/XCTestProbe.swift"
   -F "$DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/Library/Frameworks" \
   "$ROOT/Builds/XCTestProbe.swift"
 echo "Resolving the pinned SwiftTerm dependency..."
+bash "$ROOT/Tools/BuildRDPEngine.sh"
 xcrun swift package resolve
 echo "Running native core tests..."
 xcrun swift test --arch x86_64
@@ -81,6 +82,8 @@ iconutil -c icns "$WORK/Termora.iconset" -o "$APP/Contents/Resources/Termora.icn
 cp "$ROOT/LICENSE" "$APP/Contents/Resources/LICENSE.txt"
 cp "$ROOT/THIRD-PARTY-NOTICES.md" "$APP/Contents/Resources/THIRD-PARTY-NOTICES.md"
 lipo "$APP/Contents/MacOS/TermoraNative" -verify_arch x86_64
+python3 "$ROOT/Tools/BundleRDPEngine.py" "$ROOT" "$APP"
+"$APP/Contents/Helpers/TermoraRDP" /version
 codesign --force --sign "${TERMORA_SIGNING_IDENTITY:--}" --timestamp=none "$APP"
 codesign --verify --deep --strict --verbose=2 "$APP"
 mkdir -p "$WORK/test-data"

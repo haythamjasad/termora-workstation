@@ -32,6 +32,13 @@ final class TerminalController: NSViewController, LocalProcessTerminalViewDelega
             let command: LaunchCommand
             if CommandLine.arguments.contains("--smoke-test"), session.type == .local {
                 command = LaunchCommand(executable: "/bin/sh", arguments: [], directory: ProcessInfo.processInfo.environment["TERMORA_NATIVE_SMOKE_DATA"])
+            } else if session.type == .rdp {
+                let executable = Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/TermoraRDP").path
+                let host = session.host.contains(":") ? "[\(session.host)]" : session.host
+                var arguments = ["/v:\(host):\(session.port)", "/from-stdin", "/dynamic-resolution", "/title:Termora — \(session.name)"]
+                if !session.username.isEmpty { arguments.append("/u:\(session.username)") }
+                command = LaunchCommand(executable: executable, arguments: arguments)
+                terminal.feed(text: "Termora Remote Desktop\r\nEnter authentication details here when requested. The desktop opens in a Termora RDP window.\r\n")
             } else { command = try LaunchCommand.make(for: session, loginShell: shell) }
             guard FileManager.default.isExecutableFile(atPath: command.executable) else { throw NativeError("The command is unavailable: \(command.executable)") }
             let directory = command.directory ?? FileManager.default.homeDirectoryForCurrentUser.path
