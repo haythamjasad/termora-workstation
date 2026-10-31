@@ -1,5 +1,5 @@
 """Copy the RDP client and its dylib closure into an independent app bundle."""
-import pathlib, re, shutil, subprocess, sys
+import os, pathlib, re, shutil, subprocess, sys
 
 root, app = map(pathlib.Path, sys.argv[1:])
 source = root / 'Builds/rdp-engine/bin/sdl3-freerdp'
@@ -19,6 +19,7 @@ def bundle(original, target):
             raise RuntimeError(f'Conflicting library names: {original}, {copied[target]}')
         return
     copied[target] = original
+    target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(original, target)
     target.chmod(0o755)
     rpaths = re.findall(r'path (.+) \(offset', output('otool', '-l', str(original)))
@@ -40,12 +41,19 @@ def bundle(original, target):
             raise RuntimeError(f'Unresolved dependency {dependency} in {original}')
         destination = libraries / resolved.name
         bundle(resolved, destination)
-        replacement = ('@loader_path/../Frameworks/FreeRDP/' if target == helper else '@loader_path/') + destination.name
+        replacement = '@loader_path/' + pathlib.Path(os.path.relpath(destination, target.parent)).as_posix()
         subprocess.run(['install_name_tool', '-change', dependency, replacement, str(target)], check=True)
-    if target != helper:
+    if target != helper and target.parent == libraries:
         subprocess.run(['install_name_tool', '-id', '@rpath/' + target.name, str(target)], check=True)
 
 bundle(source, helper)
+# OpenSSL loads its legacy provider dynamically, so otool's dylib closure alone
+# misses it. NTLM requires its MD4/RC4 algorithms on OpenSSL-based builds.
+providers = [original.parent / 'ossl-modules/legacy.dylib' for original in copied.values() if original.name.startswith('libcrypto.')]
+provider = next((candidate for candidate in providers if candidate.is_file()), None)
+if provider is None:
+    raise RuntimeError('OpenSSL legacy provider is required for bundled RDP authentication')
+bundle(provider, libraries / 'ossl-modules/legacy.dylib')
 for binary in copied:
     subprocess.run(['codesign', '--force', '--sign', '-', '--timestamp=none', str(binary)], check=True)
     linked = output('otool', '-L', str(binary))

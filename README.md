@@ -35,7 +35,9 @@ bash scripts/build-mac-port.sh
 
 This produces `release/Termora-Workstation-macOS-Intel.dmg`, bundles FreeRDP,
 checks its `/version`, signs the application locally, and verifies both the
-staged app and the app mounted from the DMG. The build requires a logged-in Mac
+staged app and the app mounted from the DMG. RDP verification also makes a
+loopback connection attempt with the bundled OpenSSL legacy provider and checks
+that connection failures reach the UI. The build requires a logged-in Mac
 desktop for its UI checks. The local signature is ad hoc, not a Developer ID
 signature or notarization.
 

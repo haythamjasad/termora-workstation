@@ -412,7 +412,7 @@ function mountVnc(entry) {
   bridge.startVnc(entry.id).catch(error => toast(message(error), true));
 }
 async function connect(config) {
-  if (['rdp','xdmcp'].includes(config.type) || (config.type === 'vnc' && config.vncViewer === 'external')) { await bridge.launchExternal(config); toast(`${config.type.toUpperCase()} client opened.`); return; }
+  if (['rdp','xdmcp'].includes(config.type) || (config.type === 'vnc' && config.vncViewer === 'external')) { const result=await bridge.launchExternal(config); if(!result?.cancelled)toast(`${config.type.toUpperCase()} client started. Complete sign-in in its window.`); return; }
   if (config.type === 'vnc') { $('#status-text').textContent = `Connecting to ${sessionTitle(config)}…`; try { await mountTerminal(await bridge.openVnc(config), config, true); } catch (error) { updateStatus(); throw error; } return; }
   if (config.type === 'browser' || (config.type === 'file' && /^https?:\/\//i.test(config.path || ''))) { await bridge.openBrowser({ url: config.path, title: config.name }); toast('Browser window opened.'); return; }
   if (config.type === 'file') {
@@ -911,6 +911,7 @@ function bindEvents(){
 async function initialize(){
   icons();$('#window-minimize').innerHTML=svg('minus');$('#window-maximize').innerHTML=svg('maximize');$('#window-close').innerHTML=svg('close');$('#home-date').textContent=new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}).toUpperCase();
   bridge=window.bridge;
+  bridge?.onExternalError?.(event=>toast(event.message,true));
   if(!bridge){$('#status-text').textContent='Desktop connection unavailable';$('#status-dot').style.background='var(--danger)';toast('Open Termora through the desktop launcher to use terminal and file features.',true);return;}
   bridge.onTerminalData(event=>{const entry=state.terminals.get(event.id);if(entry?.term)entry.term.write(terminalText(entry,event.data));else if(!entry)state.buffered.set(event.id,((state.buffered.get(event.id)||'')+event.data).slice(-1024*1024));});bridge.onTerminalExit(event=>{vncChannels.get(event.id)?.ended();vncChannels.delete(event.id);terminalExited(event);});bridge.onVncData(({id,data})=>vncChannels.get(id)?.receive(data));
   const data=await bridge.bootstrap();Object.assign(state,{sessions:data.sessions||[],settings:{...state.settings,...data.settings},macros:data.macros||[],tunnels:data.tunnels||[],homePath:data.homePath||'',capabilities:data.capabilities||{},appName:data.appName||'Termora',platform:data.platform||'win32',version:data.version||'0.1.0',vault:data.vault||{available:false,saved:[]},logDirectory:data.logDirectory||''});

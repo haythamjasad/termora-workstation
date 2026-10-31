@@ -158,7 +158,7 @@ function registerIPC() {
     throw new Error('Choose upload or download.');
   });
   handle('vnc:open', config => terminals.openVnc(vault.apply(config))); handle('vnc:start', id => terminals.vncStart(id)); handle('vnc:write', request => terminals.vncWrite(request));
-  handle('tools:run', runTool); handle('tools:launch', config => launchExternal(config, tools, store.read().settings)); handle('serial:list', () => terminals.listSerialPorts());
+  handle('tools:run', runTool); handle('tools:launch', (event, config) => launchExternal(config, tools, store.read().settings, { onFailure: message => { if (!event.sender.isDestroyed()) event.sender.send('app:external-error', { message }); } }), { withEvent: true }); handle('serial:list', () => terminals.listSerialPorts());
   handle('tunnels:create', config => terminals.createTunnel(vault.apply(config))); handle('tunnels:close', id => terminals.closeTunnel(id)); handle('tunnels:list', () => terminals.listTunnels());
   handle('servers:list', () => servers.list()); handle('servers:start', config => servers.start(config)); handle('servers:stop', id => servers.stop(id));
   handle('cron:list', () => ({ jobs: store.read().cronJobs || [], results: servers.cronResults() }));

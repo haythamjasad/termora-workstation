@@ -8,7 +8,7 @@ const subscribe = channel => callback => {
 };
 contextBridge.exposeInMainWorld('bridge', Object.freeze({
   platform: process.platform,
-  onAppMenu: subscribe('app:menu'),
+  onAppMenu: subscribe('app:menu'), onExternalError: subscribe('app:external-error'),
   bootstrap: invoke('app:bootstrap'), saveSessions: invoke('state:sessions'), saveSettings: invoke('state:settings'), saveMacros: invoke('state:macros'),
   openTerminal: invoke('terminal:open'), writeTerminal: invoke('terminal:write'), resizeTerminal: invoke('terminal:resize'), closeTerminal: invoke('terminal:close'),
   onTerminalData: subscribe('terminal:data'), onTerminalExit: subscribe('terminal:exit'),
