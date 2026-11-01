@@ -121,14 +121,23 @@ async function verifyHost({ host, port, fingerprint }) {
   if (answer.response !== 1) return false;
   store.update('knownHosts', { ...(store.read().knownHosts || {}), [key]: fingerprint }); return true;
 }
+async function verifyRdpCertificate(details) {
+  const { host, port, fingerprint } = details;
+  const key = `[${host}]:${port}`, known = store.read().knownRdpHosts || {};
+  if (known[key] === fingerprint) return true;
+  const changed = Boolean(known[key]);
+  const answer = await dialog.showMessageBox(window, { type: changed ? 'warning' : 'question', title: changed ? 'RDP server certificate changed' : 'Verify RDP server identity', message: `${changed ? 'The certificate changed for' : 'Trust the RDP certificate for'} ${String(host).slice(0,253)}:${port}?`, detail: `Certificate: ${String(details.subject).slice(0,1024)}\nIssuer: ${String(details.issuer).slice(0,1024)}\nFingerprint: ${fingerprint}${changed ? `\nSaved fingerprint: ${known[key]}` : ''}\n\nVerify this fingerprint with the server administrator before trusting it.`, buttons: ['Cancel', 'Trust and connect'], defaultId: 0, cancelId: 0, noLink: true });
+  if (answer.response !== 1) return false;
+  store.update('knownRdpHosts', { ...known, [key]: fingerprint }); return true;
+}
 function registerIPC() {
   handle('app:bootstrap', () => {
     const state = store.read();
     let serial = false; try { serial = Boolean(require('serialport').SerialPort); } catch {}
     return { version: app.getVersion(), appName: 'Termora', platform: process.platform, sessions: state.sessions, settings: state.settings, macros: state.macros, cronJobs: state.cronJobs || [], tunnels: terminals.listTunnels(), servers: servers.list(), homePath: os.homedir(), dataPath: app.getPath('userData'),
       vault: { available: vault.canSave(), saved: Object.keys(state.vault || {}) }, logDirectory: terminals.logging.directory,
-      capabilities: { local: true, powershell: Boolean(tools.powershell), cmd: Boolean(tools.cmd), wsl: Boolean(tools.wsl), ssh: true, sftp: true, ftp: true, ftps: true, telnet: true, rsh: true, rlogin: true, mosh: true, serial, rdp: Boolean(tools.rdp), vnc: true, vncExternal: Boolean(tools.vnc), x11: Boolean(tools.x11), xdmcp: Boolean(tools.x11),
-        details: { wsl: 'Requires an installed WSL distribution.', rdp: process.platform === 'darwin' ? 'Uses the RDP engine bundled in Termora.' : 'Opens the Windows Remote Desktop client.', vnc: 'Embedded noVNC viewer (None or VNC-password security); an installed TigerVNC/RealVNC viewer can be used instead.', x11: 'Starts an installed VcXsrv server; SSH sessions with X11-Forwarding relay remote X clients to it.', telnet: 'Unencrypted TCP terminal with basic Telnet option negotiation.', rsh: 'Unencrypted r-services session (rlogin, or rsh when a command is set).', mosh: 'Built-in Mosh client: starts mosh-server over SSH, then uses encrypted UDP (no local echo prediction).', ftp: 'FTP is unencrypted. Prefer SFTP or FTPS.', serial: 'Physical serial hardware is required.' } } };
+      capabilities: { local: true, powershell: Boolean(tools.powershell), cmd: Boolean(tools.cmd), wsl: Boolean(tools.wsl), ssh: true, sftp: true, ftp: true, ftps: true, telnet: true, rsh: true, rlogin: true, mosh: true, serial, rdp: Boolean(process.platform === 'darwin' ? tools.rdpEmbedded : tools.rdp), vnc: true, vncExternal: Boolean(tools.vnc), x11: Boolean(tools.x11), xdmcp: Boolean(tools.x11),
+        details: { wsl: 'Requires an installed WSL distribution.', rdp: process.platform === 'darwin' ? 'Embedded RDP desktop with credentials entered in Termora.' : 'Opens the Windows Remote Desktop client.', vnc: 'Embedded noVNC viewer (None or VNC-password security); an installed TigerVNC/RealVNC viewer can be used instead.', x11: 'Starts an installed VcXsrv server; SSH sessions with X11-Forwarding relay remote X clients to it.', telnet: 'Unencrypted TCP terminal with basic Telnet option negotiation.', rsh: 'Unencrypted r-services session (rlogin, or rsh when a command is set).', mosh: 'Built-in Mosh client: starts mosh-server over SSH, then uses encrypted UDP (no local echo prediction).', ftp: 'FTP is unencrypted. Prefer SFTP or FTPS.', serial: 'Physical serial hardware is required.' } } };
   });
   handle('state:sessions', value => { const saved = store.saveSessions(value); vault.prune(saved.map(session => session.id)); return saved; });
   handle('state:settings', value => { const saved = store.saveSettings(value); applyLogging(saved); return saved; }); handle('state:macros', value => store.saveMacros(value));
@@ -157,6 +166,8 @@ function registerIPC() {
     }
     throw new Error('Choose upload or download.');
   });
+  handle('rdp:paste', request => terminals.rdpPaste(request));
+  handle('rdp:open', config => terminals.openRdp(vault.apply(config)));
   handle('vnc:open', config => terminals.openVnc(vault.apply(config))); handle('vnc:start', id => terminals.vncStart(id)); handle('vnc:write', request => terminals.vncWrite(request));
   handle('tools:run', runTool); handle('tools:launch', (event, config) => launchExternal(config, tools, store.read().settings, { onFailure: message => { if (!event.sender.isDestroyed()) event.sender.send('app:external-error', { message }); } }), { withEvent: true }); handle('serial:list', () => terminals.listSerialPorts());
   handle('tunnels:create', config => terminals.createTunnel(vault.apply(config))); handle('tunnels:close', id => terminals.closeTunnel(id)); handle('tunnels:list', () => terminals.listTunnels());
@@ -220,7 +231,7 @@ function createWindow() {
   window.loadFile(rendererPath);
   window.on('closed', () => { terminals.closeAll(); window = null; for (const record of detached.values()) record.window.destroy(); });
 }
-app.whenReady().then(() => { if (!primaryInstance) return; store = new StateStore(app.getPath('userData')); tools = installedTools(); terminals = new TerminalManager({ emit, store, verifyHost }); vault = new CredentialVault(store, safeStorage); applyLogging(store.read().settings); files = new FileManager(terminals);
+app.whenReady().then(() => { if (!primaryInstance) return; store = new StateStore(app.getPath('userData')); tools = installedTools(); terminals = new TerminalManager({ emit, store, verifyHost, verifyRdpCertificate }); vault = new CredentialVault(store, safeStorage); applyLogging(store.read().settings); files = new FileManager(terminals);
   servers = new ServerManager({ dataDir: app.getPath('userData'), cronJobs: () => store.read().cronJobs || [], onCronResult: result => { if (window && !window.isDestroyed()) window.webContents.send('cron:result', result); } });
   // macOS routes Cmd+C/V/A/Q through the application menu, so keep a minimal one there.
   const command = (label, action, accelerator) => ({ label, accelerator, click: () => {

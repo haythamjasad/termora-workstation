@@ -70,11 +70,15 @@ try {
     await menu('File', 'New Connection…');
     await page.locator('[data-protocol="rdp"]').click();
     await page.locator('#conn-host').fill('127.0.0.1');
+    await page.locator('#conn-username').fill('fixture');
+    await page.locator('#conn-password').fill('fixture-only');
     await page.locator('#conn-port').fill(String(port));
     await page.locator('#connection-save').evaluate(input => { input.checked = false; });
     await page.locator('#session-form').evaluate(form => form.requestSubmit());
     await page.waitForFunction(() => [...document.querySelectorAll('dialog[open] .dialog-error, .toast.error')].some(node => node.textContent.includes('could not reach the server')));
     if (await page.locator('dialog[open]').count()) await page.locator('#session-cancel').click();
+    if(await page.locator('.terminal-tab .tab-close').count())await page.locator('.terminal-tab .tab-close').click();
+    await page.waitForFunction(()=>document.querySelectorAll('.terminal-pane').length===0);
     console.log('PASS bundled RDP connection attempt, self-contained NTLM provider, and visible launch failure');
   }
   assert.equal(await page.evaluate(() => document.body.classList.contains('mac-style')), true);

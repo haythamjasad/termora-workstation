@@ -10,6 +10,7 @@
     "build": "node scripts/build.mjs",
     "start": "node scripts/start.mjs",
     "test": "node --test tests/*.test.cjs",
+    "test:rdp": "node scripts/verify-embedded-rdp.mjs",
     "test:mac": "node scripts/verify-mac-port.mjs",
     "test:desktop": "node scripts/verify-desktop.mjs",
     "test:ui": "node scripts/verify-ui.mjs",

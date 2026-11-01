@@ -18,7 +18,7 @@ contextBridge.exposeInMainWorld('bridge', Object.freeze({
   createTunnel: invoke('tunnels:create'), closeTunnel: invoke('tunnels:close'), listTunnels: invoke('tunnels:list'), listSerialPorts: invoke('serial:list'),
   listServers: invoke('servers:list'), startServer: invoke('servers:start'), stopServer: invoke('servers:stop'),
   listCronJobs: invoke('cron:list'), saveCronJobs: invoke('cron:save'), runCronJob: invoke('cron:run'), onCronResult: subscribe('cron:result'),
-  openVnc: invoke('vnc:open'), startVnc: invoke('vnc:start'), writeVnc: invoke('vnc:write'), onVncData: subscribe('vnc:data'),
+  pasteRdpClipboard: invoke('rdp:paste'), openRdp: invoke('rdp:open'), openVnc: invoke('vnc:open'), startVnc: invoke('vnc:start'), writeVnc: invoke('vnc:write'), onVncData: subscribe('vnc:data'),
   openBrowser: invoke('browser:open'), openPath: invoke('path:open'), createShortcut: invoke('session:shortcut'),
   launchRequest: invoke('app:launch-request'), onSessionLaunch: subscribe('session:launch'),
   readClipboard: invoke('clipboard:read'), writeClipboard: invoke('clipboard:write'),

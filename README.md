@@ -21,11 +21,24 @@ npm start
 Existing Homebrew installations remain supported by the RDP build tools.
 The current Homebrew installer does not support Intel Macs.
 
-Run `npm run test:mac` to build and verify the source Electron app with an
-isolated, temporary workspace. It checks native menu routing in the main and
-detached windows, SSH settings, saved appearance, real shell input/output,
-multiple tabs and split panes. Windows desktop UI checks use
-`npm run test:desktop` on Windows.
+Mac RDP sessions open inside a Termora tab. Enter the Windows username, domain
+(if needed), and password in the connection's Basic settings. Saving a password
+is optional and uses macOS Keychain. Passwords are never placed in helper
+arguments or connection files. Unknown or changed server certificates still
+require a trust decision inside Termora.
+
+The embedded desktop supports keyboard/mouse, Ctrl+Alt+Del, fit-to-tab scaling,
+view-only mode, fullscreen, reconnect and closing the session from its tab.
+Clipboard transfer is one-way and happens only when the user clicks **Paste
+clipboard** in that tab; there is no automatic local clipboard sharing or
+server-to-local clipboard synchronization.
+
+Use `npm run test:mac` for the shared Mac menus, settings and terminal checks,
+and `npm run test:rdp` for the embedded RDP tab and private credential path.
+`npm test` also exercises real TLS/NLA login, bitmap decoding, input, wrong
+passwords and certificate rejection against a local-only test RDP server when
+the native test helpers are built. Windows keeps its existing RDP launcher and
+uses `npm run test:desktop` for Windows desktop UI checks.
 
 Build the full Intel Electron installer with:
 
@@ -35,9 +48,8 @@ bash scripts/build-mac-port.sh
 
 This produces `release/Termora-Workstation-macOS-Intel.dmg`, bundles FreeRDP,
 checks its `/version`, signs the application locally, and verifies both the
-staged app and the app mounted from the DMG. RDP verification also makes a
-loopback connection attempt with the bundled OpenSSL legacy provider and checks
-that connection failures reach the UI. The build requires a logged-in Mac
+staged app and the app mounted from the DMG, including embedded RDP tab checks.
+The local TLS/NLA test server is compiled only for tests and is not shipped. The build requires a logged-in Mac
 desktop for its UI checks. The local signature is ad hoc, not a Developer ID
 signature or notarization.
 

@@ -81,3 +81,7 @@ html.mac-style body.theme-light, body.mac-style.theme-light { --bg:#fff; --panel
 .mac-style ::-webkit-scrollbar { width:8px; height:8px; background:transparent; }
 .mac-style ::-webkit-scrollbar-thumb { border-radius:8px; background:#8886; border:2px solid transparent; background-clip:padding-box; }
 .mac-style ::-webkit-scrollbar-track, .mac-style ::-webkit-scrollbar-corner { background:transparent; }
+
+.mac-style .rdp-auth-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+.mac-style .rdp-auth-row .field { display:flex; flex-direction:column; align-items:stretch; gap:5px; }
+.mac-style .rdp-auth-row .rdp-password-field, .mac-style .rdp-auth-row > label { grid-column:1 / -1; }

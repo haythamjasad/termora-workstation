@@ -47,6 +47,7 @@ def bundle(original, target):
         subprocess.run(['install_name_tool', '-id', '@rpath/' + target.name, str(target)], check=True)
 
 bundle(source, helper)
+bundle(root / 'Builds/rdp-engine/bin/termora-rdp-bridge', app / 'Contents/Helpers/TermoraRDPBridge')
 # OpenSSL loads its legacy provider dynamically, so otool's dylib closure alone
 # misses it. NTLM requires its MD4/RC4 algorithms on OpenSSL-based builds.
 providers = [original.parent / 'ossl-modules/legacy.dylib' for original in copied.values() if original.name.startswith('libcrypto.')]
